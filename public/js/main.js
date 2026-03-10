@@ -2,6 +2,7 @@ import { fetchRealtime, fetchReport } from "./api.js";
 import {
     log,
     setStatus,
+    setPvStatus,
     renderMetrics,
     renderTable,
     renderReport,
@@ -29,6 +30,7 @@ async function fetchAll() {
         const datas = await fetchRealtime(sn);
         renderMetrics(datas);
         renderTable(datas);
+        setPvStatus(datas);
 
         // Raport dzienny
         const report = await fetchReport(sn);

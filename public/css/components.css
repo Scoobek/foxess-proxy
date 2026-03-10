@@ -28,6 +28,24 @@
     background: var(--red);
 }
 
+.status-badge.producing .dot {
+    background: var(--green);
+    box-shadow: 0 0 6px var(--green);
+}
+
+.status-badge.producing {
+    color: var(--green);
+}
+
+.status-badge.no-production .dot {
+    background: var(--red);
+    box-shadow: 0 0 6px var(--red);
+}
+
+.status-badge.no-production {
+    color: var(--red);
+}
+
 /* Form Fields */
 .field {
     display: flex;

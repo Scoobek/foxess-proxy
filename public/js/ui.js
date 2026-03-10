@@ -32,6 +32,27 @@ export function setStatus(state) {
             : "niepołączony";
 }
 
+// Status produkcji PV
+export function setPvStatus(datas) {
+    const badge = document.getElementById("pvStatusBadge");
+    const txt = document.getElementById("pvStatusText");
+
+    // Pokaż kontrolkę po udanym połączeniu
+    badge.style.display = "flex";
+
+    // Znajdź wartość pvPower
+    const pvItem = datas.find((d) => d.variable === "pvPower");
+    const pvPower = pvItem ? pvItem.value : 0;
+
+    if (pvPower > 0) {
+        badge.className = "status-badge producing";
+        txt.textContent = "produkcja";
+    } else {
+        badge.className = "status-badge no-production";
+        txt.textContent = "brak produkcji";
+    }
+}
+
 // Renderowanie metryk
 export function renderMetrics(datas) {
     const map = {};
@@ -129,4 +150,7 @@ export function clearAll() {
         '<span class="log-line info">[system] Dane wyczyszczone</span>';
 
     setStatus("");
+
+    // Ukryj status PV
+    document.getElementById("pvStatusBadge").style.display = "none";
 }
