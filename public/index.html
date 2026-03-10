@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="pl">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>FoxESS – Monitor Falownika</title>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap"
+            rel="stylesheet"
+        />
+        <link rel="stylesheet" href="css/variables.css" />
+        <link rel="stylesheet" href="css/base.css" />
+        <link rel="stylesheet" href="css/layout.css" />
+        <link rel="stylesheet" href="css/components.css" />
+        <link rel="stylesheet" href="css/grid.css" />
+        <link rel="stylesheet" href="css/table.css" />
+    </head>
+    <body>
+        <header>
+            <div class="logo">
+                <div class="logo-icon">⚡</div>
+                <h1>Fox<span>ESS</span> Monitor</h1>
+            </div>
+            <div class="status-badge" id="statusBadge">
+                <span class="dot"></span>
+                <span id="statusText">niepołączony</span>
+            </div>
+        </header>
+
+        <!-- CONFIG -->
+        <div class="config-panel">
+            <h2>⚙ Konfiguracja</h2>
+            <div class="config-row">
+                <div class="field">
+                    <label>API KEY</label>
+                    <input
+                        type="password"
+                        id="apiKey"
+                        placeholder="Twój klucz z FoxESSCloud"
+                    />
+                </div>
+                <div class="field">
+                    <label>NUMER SERYJNY FALOWNIKA</label>
+                    <input
+                        type="text"
+                        id="deviceSn"
+                        placeholder="np. H1E123456789"
+                    />
+                </div>
+                <div style="display: flex; gap: 0.5rem; align-items: flex-end">
+                    <button class="btn" id="btnFetch" onclick="fetchAll()">
+                        Pobierz dane
+                    </button>
+                    <button class="btn btn-ghost" onclick="clearAll()">
+                        Wyczyść
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TABS -->
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('realtime', this)">
+                Dane bieżące
+            </div>
+            <div class="tab" onclick="switchTab('report', this)">
+                Raport dzienny
+            </div>
+            <div class="tab" onclick="switchTab('raw', this)">Raw JSON</div>
+        </div>
+
+        <!-- REALTIME TAB -->
+        <div id="tab-realtime">
+            <div class="metrics-grid" id="metricsGrid">
+                <div class="empty-state" style="grid-column: 1/-1">
+                    <svg
+                        width="40"
+                        height="40"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.5"
+                        viewBox="0 0 24 24"
+                    >
+                        <path d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    <p>
+                        Podaj klucz API i numer seryjny, a następnie kliknij
+                        „Pobierz dane"
+                    </p>
+                </div>
+            </div>
+
+            <div class="data-section" id="tableSection" style="display: none">
+                <div class="data-section-header">
+                    <h3>Wszystkie zmienne</h3>
+                    <span class="timestamp" id="fetchTime">–</span>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Zmienna</th>
+                            <th>Wartość</th>
+                            <th>Jednostka</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dataTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- REPORT TAB -->
+        <div id="tab-report" style="display: none">
+            <div class="data-section">
+                <div class="data-section-header">
+                    <h3>Raport produkcji – dziś</h3>
+                    <span class="timestamp" id="reportDate">–</span>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Typ</th>
+                            <th>Wartość</th>
+                            <th>Jednostka</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportTableBody">
+                        <tr>
+                            <td colspan="3" class="empty-state">
+                                Pobierz dane aby wyświetlić raport
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- RAW JSON TAB -->
+        <div id="tab-raw" style="display: none">
+            <div class="log-box" id="rawJson">Oczekiwanie na dane…</div>
+        </div>
+
+        <!-- LOG -->
+        <div class="section-sep">LOG</div>
+        <div class="log-box" id="logBox">
+            <span class="log-line info"
+                >[system] Gotowy do połączenia z FoxESS Cloud API</span
+            >
+        </div>
+
+        <script type="module" src="js/main.js"></script>
+    </body>
+</html>

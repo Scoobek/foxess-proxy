@@ -1,0 +1,85 @@
+/* Metrics Grid */
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+/* Metric Card */
+.metric-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1.25rem;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+}
+
+.metric-card:hover {
+    border-color: var(--accent);
+}
+
+.metric-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--accent);
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.metric-card:hover::before {
+    opacity: 1;
+}
+
+.metric-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.6rem;
+    font-family: var(--mono);
+}
+
+.metric-value {
+    font-size: 1.8rem;
+    font-weight: 800;
+    line-height: 1;
+    font-family: var(--mono);
+}
+
+.metric-unit {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-left: 0.25rem;
+    font-weight: 400;
+}
+
+/* Metric Colors */
+.metric-accent {
+    color: var(--accent);
+}
+
+.metric-blue {
+    color: var(--accent2);
+}
+
+.metric-green {
+    color: var(--green);
+}
+
+.metric-red {
+    color: var(--red);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .metrics-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
