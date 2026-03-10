@@ -4,10 +4,13 @@
  * Dashboard będzie dostępny na: http://localhost:3000
  */
 
-const express = require("express");
-const fetch = require("node-fetch");
-const path = require("path");
-const crypto = require("crypto");
+import express from "express";
+import path from "path";
+import crypto from "crypto";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // ─── GENEROWANIE PODPISU MD5 ────────────────────────────────────────────────
 // FoxESS wymaga literalnych znaków \r\n (nie CR+LF)

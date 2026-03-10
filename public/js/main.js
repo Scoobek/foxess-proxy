@@ -1,4 +1,9 @@
-import { fetchRealtime, fetchReport } from "./api.js";
+import {
+    fetchHistory,
+    fetchPlatns,
+    fetchRealtime,
+    fetchReport,
+} from "./api.js";
 import {
     log,
     setStatus,
@@ -34,6 +39,8 @@ async function fetchAll() {
 
         // Raport dzienny
         const report = await fetchReport(sn);
+        const plantReports = await fetchPlatns();
+        const historyData = await fetchHistory(sn);
         renderReport(report);
 
         // Raw JSON
@@ -45,6 +52,7 @@ async function fetchAll() {
 
         setStatus("connected");
         log("Wszystkie dane pobrane pomyślnie ✓", "ok");
+        log("History data ", historyData);
     } catch (err) {
         setStatus("error");
         log(`BŁĄD: ${err.message}`, "err");

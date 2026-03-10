@@ -1,5 +1,6 @@
 import { KEY_METRICS, EXTRA_REALTIME_VARS, REPORT_VARS } from "./config.js";
 import { log } from "./ui.js";
+import { calculateHistoryConsumption } from "./utils.js";
 
 // Zapytanie do API przez lokalny proxy
 export async function apiPost(apiPath, body) {
@@ -22,7 +23,9 @@ export async function apiPost(apiPath, body) {
     const data = await res.json();
 
     if (data.errno !== 0) {
-        throw new Error(`API errno ${data.errno}: ${data.msg ?? "nieznany błąd"}`);
+        throw new Error(
+            `API errno ${data.errno}: ${data.msg ?? "nieznany błąd"}`
+        );
     }
 
     return data;
@@ -61,4 +64,50 @@ export async function fetchReport(sn) {
     });
 
     return data.result ?? [];
+}
+
+// Pobieranie listy elektrowni
+export async function fetchPlatns() {
+    log("Pobieranie listy elektrowni ", "info");
+
+    const data = await apiPost("/op/v0/plant/list", {
+        currentPage: 1,
+        pageSize: 10,
+    });
+
+    return data.result ?? [];
+}
+
+// Pobieranie danych historycznych z bieżącego dnia
+export async function fetchHistory(sn) {
+    log("Pobieranie danych historycznych…", "info");
+
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const day = String(today.getDate()).padStart(2, "0");
+
+    const begin = new Date(`${year}-${month}-${day}T00:00:00`).getTime();
+    const end = new Date(`${year}-${month}-${day}T23:59:59`).getTime();
+
+    const data = await apiPost("/op/v0/device/history/query", {
+        sn,
+        variables: [
+            "loadsPower",
+            "gridConsumptionPower",
+            "feedinPower",
+            "pvPower",
+        ],
+        begin,
+        end,
+    });
+
+    console.log("fetch history");
+
+    const result = data.result ?? [];
+    const historyConsumption = calculateHistoryConsumption(data.result);
+    console.log(historyConsumption);
+    log(`Odebrano ${result.length} serii historycznych`, "ok");
+
+    return result;
 }
