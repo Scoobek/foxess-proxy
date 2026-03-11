@@ -9,18 +9,17 @@ const HISTORY_VARIABLES = [
     "pvPower",
 ];
 
-// Zapytanie do API przez lokalny proxy
-export async function apiPost(apiPath, body) {
-    const apiKey = document.getElementById("apiKey").value.trim();
+// Pomocnicza funkcja do pobierania tokenu
+function getToken() {
+    return document.getElementById("apiKey").value.trim();
+}
 
-    const res = await fetch("/proxy", {
+// Pomocnicza funkcja do wykonywania requestów API
+async function apiRequest(endpoint, body) {
+    const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            apiPath,
-            token: apiKey,
-            body,
-        }),
+        body: JSON.stringify({ token: getToken(), ...body }),
     });
 
     if (!res.ok) {
@@ -44,10 +43,7 @@ export async function fetchRealtime(sn) {
 
     const variables = KEY_METRICS.map((m) => m.key).concat(EXTRA_REALTIME_VARS);
 
-    const data = await apiPost("/op/v0/device/real/query", {
-        sn,
-        variables,
-    });
+    const data = await apiRequest("/api/realtime", { sn, variables });
 
     const result = data.result?.[0]?.datas ?? [];
     log(`Odebrano ${result.length} zmiennych`, "ok");
@@ -61,7 +57,7 @@ export async function fetchReport(sn) {
 
     const today = new Date();
 
-    const data = await apiPost("/op/v0/device/report/query", {
+    const data = await apiRequest("/api/report", {
         sn,
         year: today.getFullYear(),
         month: today.getMonth() + 1,
@@ -74,10 +70,10 @@ export async function fetchReport(sn) {
 }
 
 // Pobieranie listy elektrowni
-export async function fetchPlatns() {
-    log("Pobieranie listy elektrowni ", "info");
+export async function fetchPlants() {
+    log("Pobieranie listy elektrowni…", "info");
 
-    const data = await apiPost("/op/v0/plant/list", {
+    const data = await apiRequest("/api/plants", {
         currentPage: 1,
         pageSize: 10,
     });
@@ -92,7 +88,7 @@ export async function fetchHistory(sn, dateStr) {
 
     log(`Pobieranie danych historycznych (${date})…`, "info");
 
-    const data = await apiPost("/op/v0/device/history/query", {
+    const data = await apiRequest("/api/history", {
         sn,
         variables: HISTORY_VARIABLES,
         begin,
@@ -101,7 +97,6 @@ export async function fetchHistory(sn, dateStr) {
 
     const result = data.result ?? [];
 
-    // Debug - sprawdź strukturę odpowiedzi
     console.log("API history response:", JSON.stringify(result, null, 2));
 
     const consumption = calculateHistoryConsumption(result);

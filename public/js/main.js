@@ -1,6 +1,6 @@
 import {
     fetchHistory,
-    fetchPlatns,
+    fetchPlants,
     fetchRealtime,
     fetchReport,
 } from "./api.js";
@@ -39,7 +39,7 @@ async function fetchAll() {
 
         // Raport dzienny
         const report = await fetchReport(sn);
-        const plantReports = await fetchPlatns();
+        const plantReports = await fetchPlants();
         const historyData = await fetchHistory(sn, "2026-03-11");
         renderReport(report);
 

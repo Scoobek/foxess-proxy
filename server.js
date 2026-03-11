@@ -29,20 +29,16 @@ app.use(express.json());
 // Serwuj dashboard (plik HTML) pod /
 app.use(express.static(path.join(__dirname, "public")));
 
-// ─── PROXY ENDPOINT ─────────────────────────────────────────────────────────
-// Frontend wywołuje POST http://localhost:3000/proxy
-// Body: { path, token, timestamp, signature, body }
-// Serwer przekazuje żądanie do FoxESS i zwraca odpowiedź
+// ─── FOXESS API PATHS ───────────────────────────────────────────────────────
+const API_PATHS = {
+    realtime: "/op/v0/device/real/query",
+    report: "/op/v0/device/report/query",
+    plants: "/op/v0/plant/list",
+    history: "/op/v0/device/history/query",
+};
 
-app.post("/proxy", async (req, res) => {
-    const { apiPath, token, body } = req.body;
-
-    if (!apiPath || !token) {
-        return res.status(400).json({
-            error: "Brakujące parametry: apiPath, token",
-        });
-    }
-
+// ─── PROXY HELPER ───────────────────────────────────────────────────────────
+async function proxyRequest(apiPath, token, body, res) {
     const timestamp = Date.now();
     const signature = generateSignature(apiPath, token, timestamp);
     const url = `${FOXESS_BASE}${apiPath}`;
@@ -73,6 +69,57 @@ app.post("/proxy", async (req, res) => {
         console.error("[proxy] Błąd:", err.message);
         res.status(502).json({ error: `Proxy błąd: ${err.message}` });
     }
+}
+
+// ─── API ENDPOINTS ──────────────────────────────────────────────────────────
+
+// GET /api/realtime - dane bieżące z falownika
+app.post("/api/realtime", async (req, res) => {
+    const { token, sn, variables } = req.body;
+
+    if (!token || !sn) {
+        return res.status(400).json({ error: "Brakujące parametry: token, sn" });
+    }
+
+    await proxyRequest(API_PATHS.realtime, token, { sn, variables }, res);
+});
+
+// POST /api/report - raport dzienny
+app.post("/api/report", async (req, res) => {
+    const { token, sn, year, month, day, dimension, variables } = req.body;
+
+    if (!token || !sn) {
+        return res.status(400).json({ error: "Brakujące parametry: token, sn" });
+    }
+
+    await proxyRequest(
+        API_PATHS.report,
+        token,
+        { sn, year, month, day, dimension, variables },
+        res
+    );
+});
+
+// POST /api/plants - lista elektrowni
+app.post("/api/plants", async (req, res) => {
+    const { token, currentPage = 1, pageSize = 10 } = req.body;
+
+    if (!token) {
+        return res.status(400).json({ error: "Brakujący parametr: token" });
+    }
+
+    await proxyRequest(API_PATHS.plants, token, { currentPage, pageSize }, res);
+});
+
+// POST /api/history - dane historyczne
+app.post("/api/history", async (req, res) => {
+    const { token, sn, variables, begin, end } = req.body;
+
+    if (!token || !sn) {
+        return res.status(400).json({ error: "Brakujące parametry: token, sn" });
+    }
+
+    await proxyRequest(API_PATHS.history, token, { sn, variables, begin, end }, res);
 });
 
 // ─── START ───────────────────────────────────────────────────────────────────
