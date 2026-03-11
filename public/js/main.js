@@ -40,7 +40,7 @@ async function fetchAll() {
         // Raport dzienny
         const report = await fetchReport(sn);
         const plantReports = await fetchPlatns();
-        const historyData = await fetchHistory(sn);
+        const historyData = await fetchHistory(sn, "2026-03-11");
         renderReport(report);
 
         // Raw JSON

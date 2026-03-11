@@ -1,6 +1,13 @@
 import { KEY_METRICS, EXTRA_REALTIME_VARS, REPORT_VARS } from "./config.js";
 import { log } from "./ui.js";
-import { calculateHistoryConsumption } from "./utils.js";
+import { calculateHistoryConsumption, getDayTimestamps } from "./utils.js";
+
+const HISTORY_VARIABLES = [
+    "loadsPower",
+    "gridConsumptionPower",
+    "feedinPower",
+    "pvPower",
+];
 
 // Zapytanie do API przez lokalny proxy
 export async function apiPost(apiPath, body) {
@@ -78,36 +85,35 @@ export async function fetchPlatns() {
     return data.result ?? [];
 }
 
-// Pobieranie danych historycznych z bieżącego dnia
-export async function fetchHistory(sn) {
-    log("Pobieranie danych historycznych…", "info");
+// Pobieranie danych historycznych i obliczanie zużycia energii
+// dateStr: 'YYYY-MM-DD' lub undefined dla dzisiaj
+export async function fetchHistory(sn, dateStr) {
+    const { begin, end, dateStr: date } = getDayTimestamps(dateStr);
 
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, "0");
-    const day = String(today.getDate()).padStart(2, "0");
-
-    const begin = new Date(`${year}-${month}-${day}T00:00:00`).getTime();
-    const end = new Date(`${year}-${month}-${day}T23:59:59`).getTime();
+    log(`Pobieranie danych historycznych (${date})…`, "info");
 
     const data = await apiPost("/op/v0/device/history/query", {
         sn,
-        variables: [
-            "loadsPower",
-            "gridConsumptionPower",
-            "feedinPower",
-            "pvPower",
-        ],
+        variables: HISTORY_VARIABLES,
         begin,
         end,
     });
 
-    console.log("fetch history");
-
     const result = data.result ?? [];
-    const historyConsumption = calculateHistoryConsumption(data.result);
-    console.log(historyConsumption);
-    log(`Odebrano ${result.length} serii historycznych`, "ok");
 
-    return result;
+    // Debug - sprawdź strukturę odpowiedzi
+    console.log("API history response:", JSON.stringify(result, null, 2));
+
+    const consumption = calculateHistoryConsumption(result);
+
+    log(
+        `Zużycie: PV ${consumption.pv} kWh, dom ${consumption.loads} kWh (${consumption.samples} próbek)`,
+        "ok"
+    );
+
+    return {
+        date,
+        raw: result,
+        ...consumption,
+    };
 }
