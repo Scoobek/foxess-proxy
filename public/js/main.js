@@ -32,8 +32,8 @@ async function fetchAll() {
 
     try {
         // Dane bieżące
-        const datas = await fetchRealtime(sn);
-        renderMetrics(datas);
+        const { datas, time } = await fetchRealtime(sn);
+        renderMetrics(datas, time);
         renderTable(datas);
         setPvStatus(datas);
 
@@ -45,7 +45,7 @@ async function fetchAll() {
 
         // Raw JSON
         document.getElementById("rawJson").textContent = JSON.stringify(
-            { realtime: datas, report },
+            { realtime: { datas, time }, report },
             null,
             2
         );

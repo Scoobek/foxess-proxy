@@ -45,10 +45,13 @@ export async function fetchRealtime(sn) {
 
     const data = await apiRequest("/api/realtime", { sn, variables });
 
-    const result = data.result?.[0]?.datas ?? [];
-    log(`Odebrano ${result.length} zmiennych`, "ok");
+    const deviceData = data.result?.[0] ?? {};
+    const datas = deviceData.datas ?? [];
+    const time = deviceData.time ?? null;
 
-    return result;
+    log(`Odebrano ${datas.length} zmiennych`, "ok");
+
+    return { datas, time };
 }
 
 // Pobieranie raportu dziennego

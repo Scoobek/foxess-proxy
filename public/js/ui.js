@@ -67,15 +67,22 @@ export function setPvStatus(datas) {
     txt.textContent = state.label;
 }
 
+// Formatowanie czasu z API (yyyy-MM-dd HH:mm:ss zZ → HH:mm:ss)
+function formatApiTime(timeStr) {
+    if (!timeStr) return "–";
+    // Format: "2026-03-11 14:35:22 +0100"
+    const match = timeStr.match(/(\d{2}:\d{2}:\d{2})/);
+    return match ? match[1] : timeStr;
+}
+
 // Renderowanie metryk
-export function renderMetrics(datas) {
+export function renderMetrics(datas, apiTime) {
     const map = {};
     datas.forEach((d) => {
         map[d.variable] = d;
     });
 
-    const grid = document.getElementById("metricsGrid");
-    grid.innerHTML = KEY_METRICS.map((m) => {
+    const metricsHtml = KEY_METRICS.map((m) => {
         const item = map[m.key];
         const val = item ? round2(item.value) : "–";
         return `
@@ -84,6 +91,16 @@ export function renderMetrics(datas) {
                 <div class="metric-value ${m.cls}">${val}<span class="metric-unit">${m.unit}</span></div>
             </div>`;
     }).join("");
+
+    // Karta z czasem ostatniego odczytu
+    const timeCardHtml = `
+        <div class="metric-card">
+            <div class="metric-label">Ostatni odczyt</div>
+            <div class="metric-value metric-time">${formatApiTime(apiTime)}</div>
+        </div>`;
+
+    const grid = document.getElementById("metricsGrid");
+    grid.innerHTML = metricsHtml + timeCardHtml;
 }
 
 // Renderowanie tabeli danych

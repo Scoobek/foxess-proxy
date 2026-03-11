@@ -77,6 +77,11 @@
     color: var(--red);
 }
 
+.metric-time {
+    color: var(--muted);
+    font-size: 1.4rem;
+}
+
 /* Responsive */
 @media (max-width: 600px) {
     .metrics-grid {
