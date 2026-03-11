@@ -67,12 +67,14 @@ export function setPvStatus(datas) {
     txt.textContent = state.label;
 }
 
-// Formatowanie czasu z API (yyyy-MM-dd HH:mm:ss zZ → HH:mm:ss)
+// Formatowanie czasu z API (yyyy-MM-dd HH:mm:ss zZ → DD-MM-YYYY HH:mm:ss)
 function formatApiTime(timeStr) {
     if (!timeStr) return "–";
-    // Format: "2026-03-11 14:35:22 +0100"
-    const match = timeStr.match(/(\d{2}:\d{2}:\d{2})/);
-    return match ? match[1] : timeStr;
+    // Format wejściowy: "2026-03-11 14:35:22 +0100"
+    const match = timeStr.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}:\d{2}:\d{2})/);
+    if (!match) return timeStr;
+    const [, year, month, day, time] = match;
+    return `${day}-${month}-${year} ${time}`;
 }
 
 // Renderowanie metryk
