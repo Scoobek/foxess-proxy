@@ -12,6 +12,7 @@ export const KEY_METRICS = [
 
 // Dodatkowe zmienne do pobrania w realtime
 export const EXTRA_REALTIME_VARS = [
+    "runningState",
     "pv1Power",
     "pv2Power",
     "pv3Power",

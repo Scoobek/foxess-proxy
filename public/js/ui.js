@@ -32,7 +32,21 @@ export function setStatus(state) {
             : "niepołączony";
 }
 
-// Status produkcji PV
+// Mapa stanów falownika (runningState)
+const RUNNING_STATE_MAP = {
+    0: { label: "oczekiwanie", cls: "offline" },
+    1: { label: "praca sieciowa", cls: "online" },
+    2: { label: "praca wyspowa", cls: "online" },
+    3: { label: "błąd", cls: "error" },
+    4: { label: "błąd trwały", cls: "error" },
+    161: { label: "autotest", cls: "warning" },
+    163: { label: "inicjalizacja", cls: "warning" },
+    165: { label: "tryb oczekiwania", cls: "offline" },
+    167: { label: "aktualizacja", cls: "warning" },
+    169: { label: "wyłączony", cls: "offline" },
+};
+
+// Status falownika (runningState)
 export function setPvStatus(datas) {
     const badge = document.getElementById("pvStatusBadge");
     const txt = document.getElementById("pvStatusText");
@@ -40,17 +54,17 @@ export function setPvStatus(datas) {
     // Pokaż kontrolkę po udanym połączeniu
     badge.style.display = "flex";
 
-    // Znajdź wartość pvPower
-    const pvItem = datas.find((d) => d.variable === "pvPower");
-    const pvPower = pvItem ? pvItem.value : 0;
+    // Znajdź wartość runningState
+    const stateItem = datas.find((d) => d.variable === "runningState");
+    const stateValue = stateItem ? stateItem.value : null;
 
-    if (pvPower > 0) {
-        badge.className = "status-badge producing";
-        txt.textContent = "produkcja";
-    } else {
-        badge.className = "status-badge no-production";
-        txt.textContent = "brak produkcji";
-    }
+    const state = RUNNING_STATE_MAP[stateValue] ?? {
+        label: `nieznany (${stateValue})`,
+        cls: "unknown"
+    };
+
+    badge.className = `status-badge ${state.cls}`;
+    txt.textContent = state.label;
 }
 
 // Renderowanie metryk

@@ -28,22 +28,44 @@
     background: var(--red);
 }
 
-.status-badge.producing .dot {
+/* Stany falownika (runningState) */
+.status-badge.online .dot {
     background: var(--green);
     box-shadow: 0 0 6px var(--green);
 }
 
-.status-badge.producing {
+.status-badge.online {
     color: var(--green);
 }
 
-.status-badge.no-production .dot {
+.status-badge.offline .dot {
+    background: var(--muted);
+}
+
+.status-badge.offline {
+    color: var(--muted);
+}
+
+.status-badge.warning .dot {
+    background: var(--yellow);
+    box-shadow: 0 0 6px var(--yellow);
+}
+
+.status-badge.warning {
+    color: var(--yellow);
+}
+
+.status-badge.error .dot {
     background: var(--red);
     box-shadow: 0 0 6px var(--red);
 }
 
-.status-badge.no-production {
-    color: var(--red);
+.status-badge.unknown .dot {
+    background: var(--accent2);
+}
+
+.status-badge.unknown {
+    color: var(--accent2);
 }
 
 /* Form Fields */
