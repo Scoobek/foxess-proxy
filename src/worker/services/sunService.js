@@ -2,7 +2,11 @@
  * Sunrise/Sunset Service - pobieranie czasów wschodu i zachodu słońca
  */
 
-import { LOCATION_LAT, LOCATION_LNG, SUNRISE_SUNSET_API } from "../../config/sunrisesunset.js";
+import {
+    LOCATION_LAT,
+    LOCATION_LNG,
+    SUNRISE_SUNSET_API,
+} from "../../config/sunrisesunset.js";
 
 export async function fetchSunriseSunset() {
     const url = `${SUNRISE_SUNSET_API}?lat=${LOCATION_LAT}&lng=${LOCATION_LNG}&date=today`;
