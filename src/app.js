@@ -5,7 +5,7 @@
 
 import "dotenv/config";
 import { createServer } from "./api/server.js";
-import { startScheduler } from "./worker/scheduler.js";
+import { startScheduler } from "./worker/orchestration/scheduler.js";
 
 function bootstrap() {
     console.log(`\n🚀 FoxESS Proxy`);

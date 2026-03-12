@@ -2,10 +2,10 @@
  * FoxESS Data Manager - zarządzanie danymi z FoxESS API
  */
 
-import { handleBojlerAutoControl } from "../lib/bojler.js";
-import { fetchRealtimeData } from "./services/foxessService.js";
-import { REALTIME_VARIABLES } from "../config/index.js";
-import { updateBojlerState } from "../shared/state.js";
+import { handleBojlerAutoControl } from "../../lib/bojler.js";
+import { fetchRealtimeData } from "../services/foxessService.js";
+import { REALTIME_VARIABLES } from "../../config/index.js";
+import { updateBojlerState } from "../../shared/state.js";
 
 /**
  * Wyciąga wartość zmiennej z danych FoxESS

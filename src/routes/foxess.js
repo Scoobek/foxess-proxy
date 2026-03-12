@@ -9,7 +9,7 @@ import {
     fetchPlants,
     fetchHistory,
 } from "../worker/services/foxessService.js";
-import { processRealtimeData } from "../worker/foxessDataManager.js";
+import { processRealtimeData } from "../worker/managers/foxessDataManager.js";
 
 const router = Router();
 

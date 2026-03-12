@@ -13,6 +13,9 @@ export const bojlerState = {
     sunrise: null,
     sunset: null,
     isPolling: false,
+    pollingStartsAt: null,
+    pollingStopsAt: null,
+    nextPollAt: null,
 };
 
 export function updateBojlerState(updates) {

@@ -2,8 +2,9 @@
  * Sun Data Manager - zarządzanie danymi słonecznymi
  */
 
-import { updateBojlerState } from "../shared/state.js";
-import { fetchSunriseSunset } from "./services/sunService.js";
+import { updateBojlerState } from "../../shared/state.js";
+import { fetchSunriseSunset } from "../services/sunService.js";
+import { scheduleDayTimers } from "../orchestration/dayPlanner.js";
 
 /**
  * Pobiera dane sunrise/sunset i aktualizuje stan
@@ -22,6 +23,20 @@ export async function refreshSunData() {
     console.log(
         `Okno słoneczne: ${result.sunrise || "brak"} - ${result.sunset || "brak"}`
     );
+
+    return result;
+}
+
+/**
+ * Pobiera dane sunrise/sunset i planuje timery na dzień
+ * Używane przez cron i przy starcie aplikacji
+ */
+export async function refreshAndSchedule() {
+    const result = await refreshSunData();
+
+    if (result.success) {
+        scheduleDayTimers(result.sunrise, result.sunset);
+    }
 
     return result;
 }

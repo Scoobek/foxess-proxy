@@ -33,17 +33,25 @@ export function getCurrentWarsawMinutes() {
 }
 
 /**
- * Konwertuje minuty od północy na wyrażenie cron (minuty godzina * * *)
- * @param {number} totalMinutes - minuty od północy
- * @returns {string|null} wyrażenie cron lub null jeśli nieprawidłowe
+ * Formatuje minuty od północy jako HH:MM
+ * @param {number} minutes - minuty od północy
+ * @returns {string} czas w formacie "8:30"
  */
-export function minutesToCronExpression(totalMinutes) {
-    if (totalMinutes === null || totalMinutes < 0 || totalMinutes >= 1440) {
-        return null;
-    }
+export function formatMinutesAsTime(minutes) {
+    const h = Math.floor(minutes / 60);
+    const m = minutes % 60;
+    return `${h}:${String(m).padStart(2, "0")}`;
+}
 
-    const hours = Math.floor(totalMinutes / 60);
-    const minutes = totalMinutes % 60;
+/**
+ * Oblicza milisekundy do podanego czasu (w minutach od północy)
+ * @param {number} targetMinutes - docelowy czas w minutach od północy
+ * @returns {number} milisekundy do celu (lub 0 jeśli już minął)
+ */
+export function msUntilMinutes(targetMinutes) {
+    const nowMinutes = getCurrentWarsawMinutes();
+    const diffMinutes = targetMinutes - nowMinutes;
 
-    return `${minutes} ${hours} * * *`;
+    if (diffMinutes <= 0) return 0;
+    return diffMinutes * 60 * 1000;
 }

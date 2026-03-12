@@ -7,13 +7,15 @@
  * - Interwałowe odpytywanie API FoxESS
  */
 
-import { bojlerState, updateBojlerState } from "../shared/state.js";
-import { refreshRealtimeData } from "./foxessDataManager.js";
-import { parseTimeToMinutes, getCurrentWarsawMinutes } from "../shared/utils/time.js";
-import { SUNRISE_OFFSET_MINUTES } from "../config/index.js";
-
-// Interwał odpytywania API (5 minut)
-const POLLING_INTERVAL_MS = 5 * 60 * 1000;
+import { updateBojlerState } from "../../shared/state.js";
+import { refreshRealtimeData } from "../managers/foxessDataManager.js";
+import {
+    parseTimeToMinutes,
+    getCurrentWarsawMinutes,
+    formatMinutesAsTime,
+    msUntilMinutes,
+} from "../../shared/utils/time.js";
+import { SUNRISE_OFFSET_MINUTES, POLLING_INTERVAL_MS } from "../../config/index.js";
 
 // Stan timerów
 let startTimer = null;
@@ -21,25 +23,10 @@ let stopTimer = null;
 let pollingInterval = null;
 
 /**
- * Oblicza milisekundy do podanego czasu (w minutach od północy)
- * @param {number} targetMinutes - docelowy czas w minutach od północy
- * @returns {number} milisekundy do celu (lub 0 jeśli już minął)
+ * Oblicza czas następnego poll jako ISO string
  */
-function msUntil(targetMinutes) {
-    const nowMinutes = getCurrentWarsawMinutes();
-    const diffMinutes = targetMinutes - nowMinutes;
-
-    if (diffMinutes <= 0) return 0;
-    return diffMinutes * 60 * 1000;
-}
-
-/**
- * Formatuje minuty jako HH:MM
- */
-function formatTime(minutes) {
-    const h = Math.floor(minutes / 60);
-    const m = minutes % 60;
-    return `${h}:${String(m).padStart(2, "0")}`;
+function calcNextPollAt() {
+    return new Date(Date.now() + POLLING_INTERVAL_MS).toISOString();
 }
 
 /**
@@ -52,7 +39,11 @@ export function startPolling() {
     }
 
     console.log("[dayPlanner] 🟢 Start polling");
-    updateBojlerState({ isPolling: true });
+    updateBojlerState({
+        isPolling: true,
+        pollingStartsAt: null,
+        nextPollAt: calcNextPollAt(),
+    });
 
     // Natychmiastowe pierwsze odpytanie
     refreshRealtimeData();
@@ -60,6 +51,7 @@ export function startPolling() {
     // Interwał co 5 minut
     pollingInterval = setInterval(() => {
         refreshRealtimeData();
+        updateBojlerState({ nextPollAt: calcNextPollAt() });
     }, POLLING_INTERVAL_MS);
 }
 
@@ -75,7 +67,11 @@ export function stopPolling() {
     console.log("[dayPlanner] 🔴 Stop polling");
     clearInterval(pollingInterval);
     pollingInterval = null;
-    updateBojlerState({ isPolling: false });
+    updateBojlerState({
+        isPolling: false,
+        pollingStopsAt: null,
+        nextPollAt: null,
+    });
 }
 
 /**
@@ -114,19 +110,23 @@ export function scheduleDayTimers(sunrise, sunset) {
     const nowMinutes = getCurrentWarsawMinutes();
 
     console.log(`[dayPlanner] Planowanie dnia:`);
-    console.log(`  Sunrise: ${formatTime(sunriseMinutes)}`);
-    console.log(`  Start polling: ${formatTime(startMinutes)} (sunrise + ${SUNRISE_OFFSET_MINUTES}min)`);
-    console.log(`  Stop polling: ${formatTime(sunsetMinutes)} (sunset)`);
-    console.log(`  Teraz: ${formatTime(nowMinutes)}`);
+    console.log(`  Sunrise: ${formatMinutesAsTime(sunriseMinutes)}`);
+    console.log(`  Start polling: ${formatMinutesAsTime(startMinutes)} (sunrise + ${SUNRISE_OFFSET_MINUTES}min)`);
+    console.log(`  Stop polling: ${formatMinutesAsTime(sunsetMinutes)} (sunset)`);
+    console.log(`  Teraz: ${formatMinutesAsTime(nowMinutes)}`);
+
+    const pollingStartsAt = formatMinutesAsTime(startMinutes);
+    const pollingStopsAt = formatMinutesAsTime(sunsetMinutes);
 
     // Sprawdź czy jesteśmy w oknie aktywności
     if (nowMinutes >= startMinutes && nowMinutes < sunsetMinutes) {
         // Już w oknie - od razu start
         console.log("[dayPlanner] W oknie aktywności - natychmiastowy start");
+        updateBojlerState({ pollingStartsAt: null, pollingStopsAt });
         startPolling();
 
         // Zaplanuj stop na sunset
-        const msToStop = msUntil(sunsetMinutes);
+        const msToStop = msUntilMinutes(sunsetMinutes);
         stopTimer = setTimeout(() => {
             console.log("[dayPlanner] Sunset - zatrzymuję polling");
             stopPolling();
@@ -135,8 +135,10 @@ export function scheduleDayTimers(sunrise, sunset) {
 
     } else if (nowMinutes < startMinutes) {
         // Przed oknem - zaplanuj start i stop
-        const msToStart = msUntil(startMinutes);
-        const msToStop = msUntil(sunsetMinutes);
+        updateBojlerState({ pollingStartsAt, pollingStopsAt });
+
+        const msToStart = msUntilMinutes(startMinutes);
+        const msToStop = msUntilMinutes(sunsetMinutes);
 
         startTimer = setTimeout(() => {
             console.log("[dayPlanner] Sunrise + offset - uruchamiam polling");
@@ -153,6 +155,7 @@ export function scheduleDayTimers(sunrise, sunset) {
 
     } else {
         // Po sunset - nic nie robimy do jutra
+        updateBojlerState({ pollingStartsAt: null, pollingStopsAt: null, nextPollAt: null });
         console.log("[dayPlanner] Po sunset - polling nieaktywny do jutra");
     }
 }
