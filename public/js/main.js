@@ -38,21 +38,22 @@ async function fetchAll() {
         setPvStatus(datas);
 
         // Raport dzienny
-        const report = await fetchReport(sn);
-        const plantReports = await fetchPlants();
-        const historyData = await fetchHistory(sn, "2026-03-11");
-        renderReport(report);
+        // const report = await fetchReport(sn);
+        // const plantReports = await fetchPlants();
+        // const historyData = await fetchHistory(sn, "2026-03-11");
+        // renderReport(report);
 
         // Raw JSON
         document.getElementById("rawJson").textContent = JSON.stringify(
-            { realtime: { datas, time }, report },
+            // { realtime: { datas, time }, report },
+            { realtime: { datas, time } },
             null,
             2
         );
 
         setStatus("connected");
         log("Wszystkie dane pobrane pomyślnie ✓", "ok");
-        log("History data ", historyData);
+        // log("History data ", historyData);
     } catch (err) {
         setStatus("error");
         log(`BŁĄD: ${err.message}`, "err");

@@ -28,3 +28,6 @@ build/
 # Misc
 *.tmp
 *.bak
+
+# Smart Home secrets
+smartHome/
