@@ -3,7 +3,7 @@
  */
 
 import { LOCATION_LAT, LOCATION_LNG, SUNRISE_SUNSET_API } from "../config/index.js";
-import { bojlerState } from "./bojler.js";
+import { bojlerState } from "../shared/state.js";
 
 export async function fetchSunriseSunset() {
     const url = `${SUNRISE_SUNSET_API}?lat=${LOCATION_LAT}&lng=${LOCATION_LNG}&date=today`;

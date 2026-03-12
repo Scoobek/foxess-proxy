@@ -3,7 +3,7 @@
  */
 
 import { Router } from "express";
-import { bojlerState } from "../lib/bojler.js";
+import { bojlerState } from "../shared/state.js";
 
 const router = Router();
 

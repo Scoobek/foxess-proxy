@@ -1,28 +1,10 @@
 /**
- * Bojler - stan i logika auto-control
+ * Bojler - logika auto-control
  */
 
 import { turnOnBojler } from "./tuya.js";
 import { BOJLER_POWER_THRESHOLD } from "../config/index.js";
-
-export const bojlerState = {
-    isOn: false,
-    lastChange: null,
-    lastCheck: null,
-    turnedOnBy: null, // 'auto' | 'manual' | null
-    pvPower: 0,
-    loadsPower: 0,
-    surplus: 0,
-    sunrise: null,
-    sunset: null,
-};
-
-export function updateBojlerState(updates) {
-    Object.assign(bojlerState, updates);
-    console.log(
-        `[bojler] Stan: ${bojlerState.isOn ? "🟢 WŁĄCZONY" : "🔴 WYŁĄCZONY"}`
-    );
-}
+import { bojlerState, updateBojlerState } from "../shared/state.js";
 
 export function checkBojlerConditions(datas) {
     const pvPower = datas.find((d) => d.variable === "pvPower")?.value ?? 0;
@@ -37,7 +19,7 @@ export function checkBojlerConditions(datas) {
     bojlerState.lastCheck = new Date().toISOString();
 
     console.log(
-        `[bojler] pvPower: ${pvPower}W, loadsPower: ${loadsPower}W, nadwyżka: ${surplus}W`
+        `[bojler] pvPower: ${pvPower}kW, loadsPower: ${loadsPower}kW, nadwyżka: ${surplus}kW`
     );
 
     // Warunki: pvPower > threshold AND surplus >= threshold
