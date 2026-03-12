@@ -2,6 +2,9 @@
  * Konfiguracja aplikacji
  */
 
+export const API_KEY = process.env.API_KEY;
+export const INVERTER_SN = process.env.INVERTER_SN;
+
 export const PORT = 3000;
 export const FOXESS_BASE = "https://www.foxesscloud.com";
 

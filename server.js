@@ -4,6 +4,7 @@
  * Dashboard będzie dostępny na: http://localhost:3000
  */
 
+import "dotenv/config";
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
