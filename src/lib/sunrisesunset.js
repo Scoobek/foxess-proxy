@@ -2,7 +2,7 @@
  * Sunrise/Sunset API - pobieranie czasów wschodu i zachodu słońca
  */
 
-import { LOCATION_LAT, LOCATION_LNG, SUNRISE_SUNSET_API } from "../config/index.js";
+import { LOCATION_LAT, LOCATION_LNG, SUNRISE_SUNSET_API } from "../config/sunrisesunset.js";
 import { bojlerState } from "../shared/state.js";
 
 export async function fetchSunriseSunset() {

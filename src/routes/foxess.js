@@ -3,7 +3,7 @@
  */
 
 import { Router } from "express";
-import { API_PATHS, FOXESS_BASE } from "../config/index.js";
+import { API_PATHS, FOXESS_BASE } from "../config/foxess.js";
 import { generateSignature, proxyRequest } from "../lib/foxess.js";
 import { handleBojlerAutoControl } from "../lib/bojler.js";
 

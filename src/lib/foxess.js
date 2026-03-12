@@ -3,7 +3,7 @@
  */
 
 import crypto from "crypto";
-import { FOXESS_BASE } from "../config/index.js";
+import { FOXESS_BASE } from "../config/foxess.js";
 
 // FoxESS wymaga literalnych znaków \r\n (nie CR+LF)
 export function generateSignature(apiPath, apiKey, timestamp) {
