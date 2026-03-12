@@ -6,7 +6,9 @@ import { dirname, join } from "path";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const keys = JSON.parse(readFileSync(join(__dirname, "smartHome/keys.json"), "utf-8"));
+const keys = JSON.parse(
+    readFileSync(join(__dirname, "smartHome/keys.json"), "utf-8")
+);
 const bojler = keys.find((d) => d.name === "bojler");
 
 const device = new TuyAPI({
@@ -17,64 +19,47 @@ const device = new TuyAPI({
 
 device.on("error", (err) => console.error("[tuya] Błąd:", err));
 
-// Włącz bojler (tylko jeśli wyłączony)
-export async function turnOnBojler() {
+// Helper - wykonaj operację na urządzeniu z auto-connect/disconnect
+async function withDevice(operation) {
     try {
         await device.find();
         await device.connect();
-
-        const status = await device.get();
-        console.log("[tuya] Bojler aktualny stan:", status ? "🟢 WŁĄCZONY" : "🔴 WYŁĄCZONY");
-
-        if (!status) {
-            await device.set({ set: true });
-            console.log("[tuya] Bojler włączony ✓");
-        } else {
-            console.log("[tuya] Bojler już włączony, pomijam");
-        }
-
+        const result = await operation();
         await device.disconnect();
-        return { success: true, wasOff: !status };
+        return { success: true, ...result };
     } catch (err) {
-        console.error("[tuya] Błąd włączania bojlera:", err.message);
+        console.error("[tuya] Błąd:", err.message);
         return { success: false, error: err.message };
     }
 }
 
-// Wyłącz bojler (tylko jeśli włączony)
-export async function turnOffBojler() {
-    try {
-        await device.find();
-        await device.connect();
+// Helper - loguj i ustaw stan
+async function setBojlerState(targetState) {
+    return withDevice(async () => {
+        const currentState = await device.get();
+        const stateLabel = currentState ? "🟢 WŁĄCZONY" : "🔴 WYŁĄCZONY";
+        console.log(`[tuya] Bojler aktualny stan: ${stateLabel}`);
 
-        const status = await device.get();
-        console.log("[tuya] Bojler aktualny stan:", status ? "🟢 WŁĄCZONY" : "🔴 WYŁĄCZONY");
-
-        if (status) {
-            await device.set({ set: false });
-            console.log("[tuya] Bojler wyłączony ✓");
-        } else {
-            console.log("[tuya] Bojler już wyłączony, pomijam");
+        if (currentState !== targetState) {
+            await device.set({ set: targetState });
+            console.log(`[tuya] Bojler ${targetState ? "włączony" : "wyłączony"} ✓`);
+            return { changed: true, isOn: targetState };
         }
 
-        await device.disconnect();
-        return { success: true, wasOn: status };
-    } catch (err) {
-        console.error("[tuya] Błąd wyłączania bojlera:", err.message);
-        return { success: false, error: err.message };
-    }
+        console.log(`[tuya] Bojler już ${targetState ? "włączony" : "wyłączony"}, pomijam`);
+        return { changed: false, isOn: currentState };
+    });
 }
+
+// Włącz bojler
+export const turnOnBojler = () => setBojlerState(true);
+
+// Wyłącz bojler
+export const turnOffBojler = () => setBojlerState(false);
 
 // Pobierz status bojlera
-export async function getBojlerStatus() {
-    try {
-        await device.find();
-        await device.connect();
-        const status = await device.get();
-        await device.disconnect();
-        return { success: true, isOn: status };
-    } catch (err) {
-        console.error("[tuya] Błąd pobierania statusu:", err.message);
-        return { success: false, error: err.message };
-    }
-}
+export const getBojlerStatus = () =>
+    withDevice(async () => {
+        const isOn = await device.get();
+        return { isOn };
+    });
