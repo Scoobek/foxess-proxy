@@ -2,7 +2,7 @@
  * Sun Data Manager - zarządzanie danymi słonecznymi
  */
 
-import { bojlerState } from "../shared/state.js";
+import { updateBojlerState } from "../shared/state.js";
 import { fetchSunriseSunset } from "./services/sunService.js";
 
 /**
@@ -13,8 +13,10 @@ export async function refreshSunData() {
     const result = await fetchSunriseSunset();
 
     if (result.success) {
-        bojlerState.sunrise = result.sunrise;
-        bojlerState.sunset = result.sunset;
+        updateBojlerState({
+            sunrise: result.sunrise,
+            sunset: result.sunset,
+        });
     }
 
     console.log(

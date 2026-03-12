@@ -13,10 +13,12 @@ export function checkBojlerConditions(datas) {
     const surplus = pvPower - loadsPower;
 
     // Aktualizuj stan z danymi PV
-    bojlerState.pvPower = pvPower;
-    bojlerState.loadsPower = loadsPower;
-    bojlerState.surplus = surplus;
-    bojlerState.lastCheck = new Date().toISOString();
+    updateBojlerState({
+        pvPower,
+        loadsPower,
+        surplus,
+        lastCheck: new Date().toISOString(),
+    });
 
     console.log(
         `[bojler] pvPower: ${pvPower}kW, loadsPower: ${loadsPower}kW, nadwyżka: ${surplus}kW`
