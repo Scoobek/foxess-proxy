@@ -16,3 +16,7 @@ export const API_PATHS = {
 };
 
 export const BOJLER_POWER_THRESHOLD = 0.2; // kW
+
+export const LOCATION_LAT = process.env.LOCATION_LAT;
+export const LOCATION_LNG = process.env.LOCATION_LNG;
+export const SUNRISE_SUNSET_API = "https://api.sunrisesunset.io/json";
