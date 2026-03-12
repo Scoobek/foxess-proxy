@@ -12,12 +12,11 @@ export const bojlerState = {
     surplus: 0,
     sunrise: null,
     sunset: null,
+    isPolling: false,
 };
 
 export function updateBojlerState(updates) {
-    // shallow copy pamiętać, gdyby stan się rozrósł
     Object.assign(bojlerState, updates);
-    console.log(
-        `[bojler] Stan: ${bojlerState.isOn ? "🟢 WŁĄCZONY" : "🔴 WYŁĄCZONY"}`
-    );
+    const keys = Object.keys(updates).join(", ");
+    console.log(`[stan] aktualizacja: ${keys}`);
 }

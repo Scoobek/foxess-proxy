@@ -1,42 +1,26 @@
 /**
- * Scheduler - orchestrator uruchamiania cron jobs
+ * Scheduler - orchestrator uruchamiania zadań
  */
 
-import { bojlerState } from "../shared/state.js";
-import {
-    foxessDataJob,
-    sunriseSunsetJob,
-    scheduleSunriseOffsetJob,
-} from "./crons.js";
-import { getDaylightStatus } from "../shared/utils/daylight.js";
+import { sunriseSunsetJob } from "./crons.js";
 import { refreshSunData } from "./sunDataManager.js";
-import { CRON_FETCH_DATA } from "../config/index.js";
+import { scheduleDayTimers, getTimerStatus } from "./dayPlanner.js";
+import { CRON_SUNRISE_SUNSET } from "../config/index.js";
 
 export async function startScheduler() {
     // Pobierz dane sunrise/sunset na start
     const result = await refreshSunData();
 
     if (result.success) {
-        // Zaplanuj offset job na podstawie pobranych danych
-        scheduleSunriseOffsetJob(result.sunrise);
+        // Zaplanuj timery na dzisiejszy dzień
+        scheduleDayTimers(result.sunrise, result.sunset);
     }
 
-    console.log("✅  Scheduler uruchomiony");
-
-    // Uruchom statyczne cron jobs
+    // Uruchom cron do codziennego odświeżania danych słonecznych
     sunriseSunsetJob.start();
 
-    // Uruchom foxessDataJob tylko jeśli jest dzień
-    const status = getDaylightStatus(bojlerState.sunrise, bojlerState.sunset);
-
-    if (status === "daylight") {
-        foxessDataJob.start();
-        console.log(
-            `⏳  Crony aktywne: sunrise/sunset (00:01), foxessData (${CRON_FETCH_DATA})`
-        );
-    } else {
-        console.log(
-            `⏳  Crony aktywne: sunrise/sunset (00:01), foxessData (nieaktywny - ${status})`
-        );
-    }
+    const status = getTimerStatus();
+    console.log("✅  Scheduler uruchomiony");
+    console.log(`⏳  Cron aktywny: sunrise/sunset (${CRON_SUNRISE_SUNSET})`);
+    console.log(`📊  Polling: ${status.isPolling ? "aktywny" : "nieaktywny"}`);
 }
