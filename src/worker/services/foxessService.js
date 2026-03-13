@@ -9,6 +9,9 @@ import {
     INVERTER_SN,
 } from "../../config/foxess.js";
 import { generateSignature } from "../../lib/foxess.js";
+import { createLogger } from "../../shared/logger.js";
+
+const log = createLogger("foxessService");
 
 /**
  * Wykonuje request do FoxESS API
@@ -21,7 +24,7 @@ async function foxessRequest(apiPath, body = {}) {
     const signature = generateSignature(apiPath, API_KEY, timestamp);
     const url = `${FOXESS_BASE}${apiPath}`;
 
-    console.log(`[foxessService] → ${apiPath}`);
+    log.debug({ path: apiPath }, "Request");
 
     try {
         const response = await fetch(url, {
@@ -38,11 +41,11 @@ async function foxessRequest(apiPath, body = {}) {
         });
 
         const data = await response.json();
-        console.log(`[foxessService] ← HTTP ${response.status}`);
+        log.debug({ path: apiPath, status: response.status }, "Response");
 
         return { success: true, data, status: response.status };
     } catch (err) {
-        console.error("[foxessService] Błąd:", err.message);
+        log.error({ path: apiPath, error: err.message }, "Błąd request");
         return { success: false, error: err.message };
     }
 }

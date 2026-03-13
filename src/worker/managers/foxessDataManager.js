@@ -6,6 +6,9 @@ import { handleBojlerAutoControl } from "../../lib/bojler.js";
 import { fetchRealtimeData } from "../services/foxessService.js";
 import { REALTIME_VARIABLES } from "../../config/index.js";
 import { updateBojlerState } from "../../shared/state.js";
+import { createLogger } from "../../shared/logger.js";
+
+const log = createLogger("foxessDataManager");
 
 /**
  * Wyciąga wartość zmiennej z danych FoxESS
@@ -52,14 +55,14 @@ export function processRealtimeData(data) {
  * @returns {Promise<{success: boolean, data?: object, error?: string}>}
  */
 export async function refreshRealtimeData() {
-    console.log("[foxessDataManager] Pobieram dane real-time...");
+    log.debug("Pobieram dane real-time...");
 
     const result = await fetchRealtimeData(REALTIME_VARIABLES);
 
     if (result.success) {
         processRealtimeData(result.data);
     } else {
-        console.error("[foxessDataManager] Błąd:", result.error);
+        log.error({ error: result.error }, "Błąd pobierania danych");
     }
 
     return result;

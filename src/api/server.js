@@ -7,6 +7,9 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { PORT } from "../config/index.js";
 import routes from "../routes/index.js";
+import { createLogger } from "../shared/logger.js";
+
+const log = createLogger("server");
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -23,6 +26,6 @@ export function createServer() {
     app.use(routes);
 
     app.listen(PORT, () => {
-        console.log(`✅  Web Server działa na http://localhost:${PORT}`);
+        log.info({ port: PORT }, "Web Server uruchomiony");
     });
 }

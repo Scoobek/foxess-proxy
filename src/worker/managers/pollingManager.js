@@ -9,6 +9,9 @@
 
 import { updateBojlerState } from "../../shared/state.js";
 import { refreshRealtimeData } from "./foxessDataManager.js";
+import { createLogger } from "../../shared/logger.js";
+
+const log = createLogger("pollingManager");
 import { calcNextPollAt } from "../../shared/utils/time.js";
 import { POLLING_INTERVAL_MS } from "../../config/index.js";
 
@@ -20,11 +23,11 @@ let pollingInterval = null;
  */
 export function startPolling() {
     if (pollingInterval) {
-        console.log("[pollingManager] Polling już aktywny");
+        log.debug("Polling już aktywny");
         return { success: false, alreadyActive: true };
     }
 
-    console.log("[pollingManager] 🟢 Start polling");
+    log.info("Start polling");
     updateBojlerState({
         isPolling: true,
         pollingStartsAt: null,
@@ -39,7 +42,7 @@ export function startPolling() {
         try {
             await refreshRealtimeData();
         } catch (error) {
-            console.error("[pollingManager] Błąd w polling interval:", error);
+            log.error({ err: error }, "Błąd w polling interval");
         }
         updateBojlerState({ nextPollAt: calcNextPollAt(POLLING_INTERVAL_MS) });
     }, POLLING_INTERVAL_MS);
@@ -53,11 +56,11 @@ export function startPolling() {
  */
 export function stopPolling() {
     if (!pollingInterval) {
-        console.log("[pollingManager] Polling już nieaktywny");
+        log.debug("Polling już nieaktywny");
         return { success: false, alreadyInactive: true };
     }
 
-    console.log("[pollingManager] 🔴 Stop polling");
+    log.info("Stop polling");
     clearInterval(pollingInterval);
     pollingInterval = null;
     updateBojlerState({

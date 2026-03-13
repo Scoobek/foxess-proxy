@@ -2,6 +2,10 @@
  * Współdzielony stan aplikacji
  */
 
+import { createLogger } from "./logger.js";
+
+const log = createLogger("state");
+
 export const bojlerState = {
     isOn: false,
     lastChange: null,
@@ -20,6 +24,5 @@ export const bojlerState = {
 
 export function updateBojlerState(updates) {
     Object.assign(bojlerState, updates);
-    const keys = Object.keys(updates).join(", ");
-    console.log(`[stan] aktualizacja: ${keys}`);
+    log.debug({ keys: Object.keys(updates) }, "Aktualizacja stanu");
 }

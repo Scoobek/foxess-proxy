@@ -4,6 +4,9 @@
 
 import TuyAPI from "tuyapi";
 import { TUYA_BOJLER } from "../config/tuya.js";
+import { createLogger } from "../shared/logger.js";
+
+const log = createLogger("tuya");
 
 const device = new TuyAPI({
     id: TUYA_BOJLER.id,
@@ -11,7 +14,7 @@ const device = new TuyAPI({
     version: TUYA_BOJLER.version,
 });
 
-device.on("error", (err) => console.error("[tuya] Błąd:", err));
+device.on("error", (err) => log.error({ err }, "Błąd urządzenia"));
 
 // Helper - wykonaj operację na urządzeniu z auto-connect/disconnect
 async function withDevice(operation) {
@@ -22,7 +25,7 @@ async function withDevice(operation) {
         await device.disconnect();
         return { success: true, ...result };
     } catch (err) {
-        console.error("[tuya] Błąd:", err.message);
+        log.error({ error: err.message }, "Błąd operacji");
         return { success: false, error: err.message };
     }
 }
@@ -31,16 +34,15 @@ async function withDevice(operation) {
 async function setBojlerState(targetState) {
     return withDevice(async () => {
         const currentState = await device.get();
-        const stateLabel = currentState ? "🟢 WŁĄCZONY" : "🔴 WYŁĄCZONY";
-        console.log(`[tuya] Bojler aktualny stan: ${stateLabel}`);
+        log.debug({ isOn: currentState }, "Aktualny stan bojlera");
 
         if (currentState !== targetState) {
             await device.set({ set: targetState });
-            console.log(`[tuya] Bojler ${targetState ? "włączony" : "wyłączony"} ✓`);
+            log.info({ isOn: targetState }, "Bojler przełączony");
             return { changed: true, isOn: targetState };
         }
 
-        console.log(`[tuya] Bojler już ${targetState ? "włączony" : "wyłączony"}, pomijam`);
+        log.debug({ isOn: currentState }, "Bojler już w docelowym stanie");
         return { changed: false, isOn: currentState };
     });
 }

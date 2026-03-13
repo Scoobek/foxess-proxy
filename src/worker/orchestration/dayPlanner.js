@@ -15,6 +15,9 @@ import {
     msUntilMinutes,
 } from "../../shared/utils/time.js";
 import { SUNRISE_OFFSET_MINUTES } from "../../config/index.js";
+import { createLogger } from "../../shared/logger.js";
+
+const log = createLogger("dayPlanner");
 
 // Stan timerów planowania
 let startTimer = null;
@@ -39,16 +42,16 @@ function clearAllTimers() {
  * Obsługuje przypadek gdy jesteśmy w oknie aktywności (między sunrise+offset a sunset)
  */
 function handleInActivityWindow(sunsetMinutes, pollingStopsAt) {
-    console.log("[dayPlanner] W oknie aktywności - natychmiastowy start");
+    log.info("W oknie aktywności - natychmiastowy start");
     updateBojlerState({ pollingStartsAt: null, pollingStopsAt });
     startPolling();
 
     const msToStop = msUntilMinutes(sunsetMinutes);
     stopTimer = setTimeout(() => {
-        console.log("[dayPlanner] Sunset - zatrzymuję polling");
+        log.info("Sunset - zatrzymuję polling");
         stopPolling();
     }, msToStop);
-    console.log(`[dayPlanner] Stop timer za ${Math.round(msToStop / 60000)} minut`);
+    log.info({ minutesUntilStop: Math.round(msToStop / 60000) }, "Stop timer zaplanowany");
 }
 
 /**
@@ -61,17 +64,16 @@ function handleBeforeWindow(startMinutes, sunsetMinutes, pollingStartsAt, pollin
     const msToStop = msUntilMinutes(sunsetMinutes);
 
     startTimer = setTimeout(() => {
-        console.log("[dayPlanner] Sunrise + offset - uruchamiam polling");
+        log.info("Sunrise + offset - uruchamiam polling");
         startPolling();
     }, msToStart);
 
     stopTimer = setTimeout(() => {
-        console.log("[dayPlanner] Sunset - zatrzymuję polling");
+        log.info("Sunset - zatrzymuję polling");
         stopPolling();
     }, msToStop);
 
-    console.log(`[dayPlanner] Start timer za ${Math.round(msToStart / 60000)} minut`);
-    console.log(`[dayPlanner] Stop timer za ${Math.round(msToStop / 60000)} minut`);
+    log.info({ minutesUntilStart: Math.round(msToStart / 60000), minutesUntilStop: Math.round(msToStop / 60000) }, "Timery zaplanowane");
 }
 
 /**
@@ -79,7 +81,7 @@ function handleBeforeWindow(startMinutes, sunsetMinutes, pollingStartsAt, pollin
  */
 function handleAfterSunset() {
     updateBojlerState({ pollingStartsAt: null, pollingStopsAt: null, nextPollAt: null });
-    console.log("[dayPlanner] Po sunset - polling nieaktywny do jutra");
+    log.info("Po sunset - polling nieaktywny do jutra");
 }
 
 /**
@@ -94,18 +96,20 @@ export function scheduleDayTimers(sunrise, sunset) {
     const sunsetMinutes = parseTimeToMinutes(sunset);
 
     if (sunriseMinutes === null || sunsetMinutes === null) {
-        console.log("[dayPlanner] Brak danych sunrise/sunset - nie planuję timerów");
+        log.warn("Brak danych sunrise/sunset - nie planuję timerów");
         return;
     }
 
     const startMinutes = sunriseMinutes + SUNRISE_OFFSET_MINUTES;
     const nowMinutes = getCurrentWarsawMinutes();
 
-    console.log(`[dayPlanner] Planowanie dnia:`);
-    console.log(`  Sunrise: ${formatMinutesAsTime(sunriseMinutes)}`);
-    console.log(`  Start polling: ${formatMinutesAsTime(startMinutes)} (sunrise + ${SUNRISE_OFFSET_MINUTES}min)`);
-    console.log(`  Stop polling: ${formatMinutesAsTime(sunsetMinutes)} (sunset)`);
-    console.log(`  Teraz: ${formatMinutesAsTime(nowMinutes)}`);
+    log.info({
+        sunrise: formatMinutesAsTime(sunriseMinutes),
+        startPolling: formatMinutesAsTime(startMinutes),
+        stopPolling: formatMinutesAsTime(sunsetMinutes),
+        now: formatMinutesAsTime(nowMinutes),
+        offsetMinutes: SUNRISE_OFFSET_MINUTES,
+    }, "Planowanie dnia");
 
     const pollingStartsAt = formatMinutesAsTime(startMinutes);
     const pollingStopsAt = formatMinutesAsTime(sunsetMinutes);

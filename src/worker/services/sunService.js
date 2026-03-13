@@ -7,11 +7,14 @@ import {
     LOCATION_LNG,
     SUNRISE_SUNSET_API,
 } from "../../config/sunrisesunset.js";
+import { createLogger } from "../../shared/logger.js";
+
+const log = createLogger("sunService");
 
 export async function fetchSunriseSunset() {
     const url = `${SUNRISE_SUNSET_API}?lat=${LOCATION_LAT}&lng=${LOCATION_LNG}&date=today`;
 
-    console.log(`[sunService] → ${url}`);
+    log.debug("Pobieranie sunrise/sunset");
 
     try {
         const response = await fetch(url);
@@ -19,13 +22,13 @@ export async function fetchSunriseSunset() {
 
         if (data.status === "OK" && data.results) {
             const { sunrise, sunset } = data.results;
-            console.log(`[sunService] sunrise: ${sunrise}, sunset: ${sunset}`);
+            log.debug({ sunrise, sunset }, "Dane pobrane");
             return { success: true, sunrise, sunset };
         }
 
         return { success: false, error: "Invalid API response" };
     } catch (err) {
-        console.error("[sunService] Błąd:", err.message);
+        log.error({ error: err.message }, "Błąd pobierania");
         return { success: false, error: err.message };
     }
 }

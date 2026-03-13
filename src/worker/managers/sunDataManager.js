@@ -5,6 +5,9 @@
 import { updateBojlerState } from "../../shared/state.js";
 import { fetchSunriseSunset } from "../services/sunService.js";
 import { scheduleDayTimers } from "../orchestration/dayPlanner.js";
+import { createLogger } from "../../shared/logger.js";
+
+const log = createLogger("sunDataManager");
 
 /**
  * Pobiera dane sunrise/sunset i aktualizuje stan
@@ -20,9 +23,7 @@ export async function refreshSunData() {
         });
     }
 
-    console.log(
-        `Okno słoneczne: ${result.sunrise || "brak"} - ${result.sunset || "brak"}`
-    );
+    log.info({ sunrise: result.sunrise || "brak", sunset: result.sunset || "brak" }, "Okno słoneczne");
 
     return result;
 }

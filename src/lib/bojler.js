@@ -5,6 +5,9 @@
 import { turnOnBojler } from "./tuya.js";
 import { BOJLER_POWER_THRESHOLD } from "../config/index.js";
 import { bojlerState, updateBojlerState } from "../shared/state.js";
+import { createLogger } from "../shared/logger.js";
+
+const log = createLogger("bojler");
 
 export function checkBojlerConditions(datas) {
     const pvPower = datas.find((d) => d.variable === "pvPower")?.value ?? 0;
@@ -20,16 +23,14 @@ export function checkBojlerConditions(datas) {
         lastCheck: new Date().toISOString(),
     });
 
-    console.log(
-        `[bojler] pvPower: ${pvPower}kW, loadsPower: ${loadsPower}kW, nadwyżka: ${surplus}kW`
-    );
+    log.info({ pvPower, loadsPower, surplus }, "Dane PV");
 
     // Warunki: pvPower > threshold AND surplus >= threshold
     const shouldTurnOn =
         pvPower > BOJLER_POWER_THRESHOLD && surplus >= BOJLER_POWER_THRESHOLD;
 
     if (shouldTurnOn) {
-        console.log(`[bojler] Warunki spełnione - można uruchomić bojler`);
+        log.info("Warunki spełnione - można uruchomić bojler");
     }
 
     return shouldTurnOn;
