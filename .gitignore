@@ -9,6 +9,7 @@ node_modules/
 # Logs
 logs/
 *.log
+*-audit.json
 npm-debug.log*
 
 # OS files

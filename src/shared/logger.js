@@ -3,6 +3,19 @@
  */
 
 import winston from "winston";
+import DailyRotateFile from "winston-daily-rotate-file";
+import path from "path";
+import fs from "fs";
+import { fileURLToPath } from "url";
+import { LOGS_DIR_NAME, TIMESTAMP_FORMAT, MAX_LOG_AGE } from "../config/logger.js";
+
+// Ścieżka do katalogu logów (root projektu + nazwa katalogu z config)
+const logsDir = path.join(path.dirname(fileURLToPath(import.meta.url)), "../..", LOGS_DIR_NAME);
+
+// Utwórz katalog logs jeśli nie istnieje
+if (!fs.existsSync(logsDir)) {
+    fs.mkdirSync(logsDir, { recursive: true });
+}
 
 const { combine, timestamp, printf, colorize, splat } = winston.format;
 
@@ -12,15 +25,30 @@ const logFormat = printf(({ timestamp, level, message, module, ...meta }) => {
     return `${timestamp} ${level} ${mod} ${message}${extra}`;
 });
 
+// Wspólna konfiguracja formatu
+const baseFormat = combine(timestamp({ format: TIMESTAMP_FORMAT }), splat(), logFormat);
+const consoleFormat = combine(timestamp({ format: TIMESTAMP_FORMAT }), splat(), colorize(), logFormat);
+
 const logger = winston.createLogger({
     level: process.env.LOG_LEVEL || "info",
-    format: combine(
-        timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
-        splat(),
-        colorize(),
-        logFormat
-    ),
-    transports: [new winston.transports.Console()],
+    transports: [
+        new winston.transports.Console({ format: consoleFormat }),
+        new DailyRotateFile({
+            dirname: logsDir,
+            filename: "combined-%DATE%.log",
+            datePattern: "YYYY-MM-DD",
+            maxFiles: MAX_LOG_AGE,
+            format: baseFormat,
+        }),
+        new DailyRotateFile({
+            dirname: logsDir,
+            filename: "error-%DATE%.log",
+            datePattern: "YYYY-MM-DD",
+            level: "error",
+            maxFiles: MAX_LOG_AGE,
+            format: baseFormat,
+        }),
+    ],
 });
 
 /**
