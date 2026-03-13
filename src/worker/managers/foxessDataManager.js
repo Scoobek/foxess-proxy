@@ -32,9 +32,8 @@ export function processRealtimeData(data) {
     // Aktualizacja stanu
     const pvPower = extractValue(datas, "pvPower");
     const loadsPower = extractValue(datas, "loadsPower");
-    const surplus = pvPower !== null && loadsPower !== null
-        ? pvPower - loadsPower
-        : null;
+    const surplus =
+        pvPower !== null && loadsPower !== null ? pvPower - loadsPower : null;
 
     updateBojlerState({
         pvPower,
@@ -65,8 +64,3 @@ export async function refreshRealtimeData() {
 
     return result;
 }
-
-/**
- * @deprecated Użyj refreshRealtimeData
- */
-export const refreshFoxessData = refreshRealtimeData;

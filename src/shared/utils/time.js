@@ -55,3 +55,12 @@ export function msUntilMinutes(targetMinutes) {
     if (diffMinutes <= 0) return 0;
     return diffMinutes * 60 * 1000;
 }
+
+/**
+ * Oblicza czas następnego poll jako ISO string
+ * @param {number} intervalMs - interwał w milisekundach
+ * @returns {string} ISO timestamp następnego poll
+ */
+export function calcNextPollAt(intervalMs) {
+    return new Date(Date.now() + intervalMs).toISOString();
+}
