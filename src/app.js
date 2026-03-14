@@ -5,13 +5,17 @@
 
 import "dotenv/config";
 import { createServer } from "./api/server.js";
+import { initWorker } from "./worker/orchestration/bootstrap.js";
 import { startScheduler } from "./worker/orchestration/scheduler.js";
 import { createLogger } from "./shared/logger.js";
 
 const log = createLogger("app");
 
-function bootstrap() {
+async function bootstrap() {
     log.info({ date: new Date().toLocaleString("pl-PL") }, "FoxESS Proxy start");
+
+    // Inicjalizacja stanów
+    await initWorker();
 
     // Uruchom Web Server
     createServer();

@@ -7,7 +7,11 @@
  */
 
 import { updateBojlerState } from "../../shared/state.js";
-import { startPolling, stopPolling, isPollingActive } from "../managers/pollingManager.js";
+import {
+    startPolling,
+    stopPolling,
+    isPollingActive,
+} from "../managers/pollingManager.js";
 import {
     parseTimeToMinutes,
     getCurrentWarsawMinutes,
@@ -51,13 +55,21 @@ function handleInActivityWindow(sunsetMinutes, pollingStopsAt) {
         log.info("Sunset - zatrzymuję polling");
         stopPolling();
     }, msToStop);
-    log.info({ minutesUntilStop: Math.round(msToStop / 60000) }, "Stop timer zaplanowany");
+    log.info(
+        { minutesUntilStop: Math.round(msToStop / 60000) },
+        "Stop timer zaplanowany"
+    );
 }
 
 /**
  * Obsługuje przypadek przed oknem aktywności (przed sunrise+offset)
  */
-function handleBeforeWindow(startMinutes, sunsetMinutes, pollingStartsAt, pollingStopsAt) {
+function handleBeforeWindow(
+    startMinutes,
+    sunsetMinutes,
+    pollingStartsAt,
+    pollingStopsAt
+) {
     updateBojlerState({ pollingStartsAt, pollingStopsAt });
 
     const msToStart = msUntilMinutes(startMinutes);
@@ -73,14 +85,24 @@ function handleBeforeWindow(startMinutes, sunsetMinutes, pollingStartsAt, pollin
         stopPolling();
     }, msToStop);
 
-    log.info({ minutesUntilStart: Math.round(msToStart / 60000), minutesUntilStop: Math.round(msToStop / 60000) }, "Timery zaplanowane");
+    log.info(
+        {
+            minutesUntilStart: Math.round(msToStart / 60000),
+            minutesUntilStop: Math.round(msToStop / 60000),
+        },
+        "Timery zaplanowane"
+    );
 }
 
 /**
  * Obsługuje przypadek po sunset - polling nieaktywny do jutra
  */
 function handleAfterSunset() {
-    updateBojlerState({ pollingStartsAt: null, pollingStopsAt: null, nextPollAt: null });
+    updateBojlerState({
+        pollingStartsAt: null,
+        pollingStopsAt: null,
+        nextPollAt: null,
+    });
     log.info("Po sunset - polling nieaktywny do jutra");
 }
 
@@ -103,13 +125,16 @@ export function scheduleDayTimers(sunrise, sunset) {
     const startMinutes = sunriseMinutes + SUNRISE_OFFSET_MINUTES;
     const nowMinutes = getCurrentWarsawMinutes();
 
-    log.info({
-        sunrise: formatMinutesAsTime(sunriseMinutes),
-        startPolling: formatMinutesAsTime(startMinutes),
-        stopPolling: formatMinutesAsTime(sunsetMinutes),
-        now: formatMinutesAsTime(nowMinutes),
-        offsetMinutes: SUNRISE_OFFSET_MINUTES,
-    }, "Planowanie dnia");
+    log.info(
+        {
+            sunrise: formatMinutesAsTime(sunriseMinutes),
+            startPolling: formatMinutesAsTime(startMinutes),
+            stopPolling: formatMinutesAsTime(sunsetMinutes),
+            now: formatMinutesAsTime(nowMinutes),
+            offsetMinutes: SUNRISE_OFFSET_MINUTES,
+        },
+        "Planowanie dnia"
+    );
 
     const pollingStartsAt = formatMinutesAsTime(startMinutes);
     const pollingStopsAt = formatMinutesAsTime(sunsetMinutes);
@@ -117,7 +142,12 @@ export function scheduleDayTimers(sunrise, sunset) {
     if (nowMinutes >= startMinutes && nowMinutes < sunsetMinutes) {
         handleInActivityWindow(sunsetMinutes, pollingStopsAt);
     } else if (nowMinutes < startMinutes) {
-        handleBeforeWindow(startMinutes, sunsetMinutes, pollingStartsAt, pollingStopsAt);
+        handleBeforeWindow(
+            startMinutes,
+            sunsetMinutes,
+            pollingStartsAt,
+            pollingStopsAt
+        );
     } else {
         handleAfterSunset();
     }
