@@ -57,6 +57,45 @@ export function checkBojlerConditions(datas) {
     return shouldTurnOn;
 }
 
+/**
+ * Ustawia stan bojlera (włącza/wyłącza) i aktualizuje state
+ * @param {boolean} isOn - docelowy stan
+ * @param {string} reason - powód zmiany ('auto' | 'sunset' | 'manual')
+ * @returns {Promise<{success: boolean}>}
+ */
+async function setBojlerState(isOn, reason) {
+    const result = isOn ? await turnOnBojler() : await turnOffBojler();
+    if (result.success) {
+        updateBojlerState({
+            isOn,
+            lastChange: new Date().toISOString(),
+            ...(isOn ? { turnedOnBy: reason } : { turnedOffBy: reason }),
+        });
+    }
+    return result;
+}
+
+/**
+ * Wyłącza bojler jeśli jest włączony
+ * @param {string} reason - powód wyłączenia ('auto' | 'sunset' | 'manual')
+ * @returns {Promise<{success: boolean, wasOn: boolean}>}
+ */
+export async function ensureBojlerOff(reason) {
+    const status = await getBojlerStatus();
+    if (!status.success) {
+        log.error({ error: status.error }, "Nie można pobrać stanu bojlera");
+        return { success: false, wasOn: false };
+    }
+
+    if (!status.isOn) {
+        return { success: true, wasOn: false };
+    }
+
+    log.info({ reason }, "Bojler włączony - wyłączam");
+    const result = await setBojlerState(false, reason);
+    return { success: result.success, wasOn: true };
+}
+
 export async function handleBojlerAutoControl(datas) {
     const shouldTurnOn = checkBojlerConditions(datas);
 
@@ -71,22 +110,8 @@ export async function handleBojlerAutoControl(datas) {
     updateBojlerState({ isOn: status.isOn });
 
     if (shouldTurnOn && !status.isOn) {
-        const result = await turnOnBojler();
-        if (result.success) {
-            updateBojlerState({
-                isOn: true,
-                lastChange: new Date().toISOString(),
-                turnedOnBy: "auto",
-            });
-        }
+        await setBojlerState(true, "auto");
     } else if (!shouldTurnOn && status.isOn) {
-        const result = await turnOffBojler();
-        if (result.success) {
-            updateBojlerState({
-                isOn: false,
-                lastChange: new Date().toISOString(),
-                turnedOffBy: "auto",
-            });
-        }
+        await setBojlerState(false, "auto");
     }
 }

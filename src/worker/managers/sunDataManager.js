@@ -36,7 +36,7 @@ export async function refreshAndSchedule() {
     const result = await refreshSunData();
 
     if (result.success) {
-        scheduleDayTimers(result.sunrise, result.sunset);
+        await scheduleDayTimers(result.sunrise, result.sunset);
     }
 
     return result;

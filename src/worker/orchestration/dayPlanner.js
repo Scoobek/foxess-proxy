@@ -7,6 +7,7 @@
  */
 
 import { updateBojlerState } from "../../shared/state.js";
+import { ensureBojlerOff } from "../../lib/bojler.js";
 import {
     startPolling,
     stopPolling,
@@ -97,12 +98,14 @@ function handleBeforeWindow(
 /**
  * Obsługuje przypadek po sunset - polling nieaktywny do jutra
  */
-function handleAfterSunset() {
+async function handleAfterSunset() {
     updateBojlerState({
         pollingStartsAt: null,
         pollingStopsAt: null,
         nextPollAt: null,
     });
+
+    await ensureBojlerOff("sunset");
     log.info("Po sunset - polling nieaktywny do jutra");
 }
 
@@ -111,7 +114,7 @@ function handleAfterSunset() {
  * @param {string} sunrise - czas sunrise w formacie "6:07:43 AM"
  * @param {string} sunset - czas sunset w formacie "7:30:00 PM"
  */
-export function scheduleDayTimers(sunrise, sunset) {
+export async function scheduleDayTimers(sunrise, sunset) {
     clearAllTimers();
 
     const sunriseMinutes = parseTimeToMinutes(sunrise);
@@ -149,7 +152,7 @@ export function scheduleDayTimers(sunrise, sunset) {
             pollingStopsAt
         );
     } else {
-        handleAfterSunset();
+        await handleAfterSunset();
     }
 }
 

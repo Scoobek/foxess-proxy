@@ -11,6 +11,7 @@ export const bojlerState = {
     lastChange: null,
     lastCheck: null,
     turnedOnBy: null, // 'auto' | 'manual' | null
+    turnedOffBy: null, // 'auto' | 'sunset' | 'manual' | null
     pvPower: 0,
     loadsPower: 0,
     surplus: 0,
