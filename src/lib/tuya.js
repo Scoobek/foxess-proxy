@@ -5,6 +5,10 @@
 
 import TuyAPI from "tuyapi";
 import { TUYA_BOJLER } from "../config/tuya.js";
+import {
+    TUYA_CONNECT_TIMEOUT_MS,
+    TUYA_MAX_RETRIES,
+} from "../config/index.js";
 import { createLogger } from "../shared/logger.js";
 
 const log = createLogger("tuya");
@@ -16,58 +20,86 @@ const device = new TuyAPI({
 });
 
 let isConnected = false;
-let isConnecting = false;
+let connectionPromise = null;
 
 // Event listeners
 device.on("connected", () => {
     isConnected = true;
-    isConnecting = false;
     log.info("Połączono z urządzeniem");
 });
 
 device.on("disconnected", () => {
     isConnected = false;
+    connectionPromise = null;
     log.info("Rozłączono z urządzeniem");
 });
 
 device.on("error", (err) => {
     isConnected = false;
-    isConnecting = false;
+    connectionPromise = null;
     log.error({ err }, "Błąd urządzenia");
 });
 
-// Zapewnij połączenie (lazy connect)
-async function ensureConnected() {
-    if (isConnected) return true;
-    if (isConnecting) {
-        // Poczekaj na zakończenie trwającego połączenia
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        return isConnected;
-    }
-
-    isConnecting = true;
+// Wymuś rozłączenie (czyści zombie connection)
+function forceDisconnect() {
+    isConnected = false;
+    connectionPromise = null;
     try {
-        await device.find({ timeout: 10000 });
-        await device.connect();
-        return true;
-    } catch (err) {
-        isConnecting = false;
-        throw err;
+        device.disconnect();
+    } catch {
+        // ignoruj
     }
 }
 
-// Helper - wykonaj operację na urządzeniu
-async function withDevice(operation) {
-    try {
-        await ensureConnected();
-        const result = await operation();
-        return { success: true, ...result };
-    } catch (err) {
-        log.error({ error: err.message }, "Błąd operacji");
-        // Przy błędzie wymuś reconnect przy następnej operacji
-        isConnected = false;
-        return { success: false, error: err.message };
+// Zapewnij połączenie (lazy connect z Promise)
+async function ensureConnected() {
+    if (isConnected) return true;
+
+    // Jeśli już trwa łączenie, czekaj na tę samą Promise
+    if (connectionPromise) {
+        return connectionPromise;
     }
+
+    connectionPromise = (async () => {
+        try {
+            await device.find({ timeout: TUYA_CONNECT_TIMEOUT_MS });
+            await device.connect();
+            return true;
+        } catch (err) {
+            connectionPromise = null;
+            throw err;
+        }
+    })();
+
+    return connectionPromise;
+}
+
+// Helper - wykonaj operację na urządzeniu z retry
+async function withDevice(operation) {
+    let lastError;
+
+    for (let attempt = 1; attempt <= TUYA_MAX_RETRIES; attempt++) {
+        try {
+            await ensureConnected();
+            const result = await operation();
+            return { success: true, ...result };
+        } catch (err) {
+            lastError = err;
+            log.warn(
+                { error: err.message, attempt, maxRetries: TUYA_MAX_RETRIES },
+                "Błąd operacji - próba retry"
+            );
+            // Wymuś reconnect przed kolejną próbą
+            forceDisconnect();
+
+            if (attempt < TUYA_MAX_RETRIES) {
+                await new Promise((r) => setTimeout(r, 500));
+            }
+        }
+    }
+
+    log.error({ error: lastError.message }, "Błąd operacji po wszystkich próbach");
+    return { success: false, error: lastError.message };
 }
 
 // Ustaw stan bojlera
@@ -79,20 +111,31 @@ async function setBojlerState(targetState) {
     });
 }
 
-// Włącz bojler
+/**
+ * Włącza bojler
+ * @returns {Promise<{success: boolean, isOn?: boolean, error?: string}>}
+ */
 export const turnOnBojler = () => setBojlerState(true);
 
-// Wyłącz bojler
+/**
+ * Wyłącza bojler
+ * @returns {Promise<{success: boolean, isOn?: boolean, error?: string}>}
+ */
 export const turnOffBojler = () => setBojlerState(false);
 
-// Pobierz status bojlera
+/**
+ * Pobiera aktualny status bojlera
+ * @returns {Promise<{success: boolean, isOn?: boolean, error?: string}>}
+ */
 export const getBojlerStatus = () =>
     withDevice(async () => {
         const isOn = await device.get({ dps: 1 });
         return { isOn };
     });
 
-// Rozłącz urządzenie (np. przy zamykaniu aplikacji)
+/**
+ * Rozłącza urządzenie (np. przy zamykaniu aplikacji)
+ */
 export function disconnectDevice() {
     if (isConnected) {
         try {

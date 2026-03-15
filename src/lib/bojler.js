@@ -60,6 +60,8 @@ export function checkBojlerConditions(datas, isOn) {
         shouldTurnOn = surplus >= 0;
         if (!shouldTurnOn) {
             log.info({ surplus }, "Brak nadwyżki - wyłączam bojler");
+        } else {
+            log.info({ surplus }, "Praca bez zmian");
         }
     } else {
         // Bojler wyłączony - sprawdź czy mamy wystarczającą moc i nadwyżkę
