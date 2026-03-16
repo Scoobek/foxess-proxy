@@ -8,6 +8,7 @@ import { TUYA_BOJLER } from "../config/tuya.js";
 import {
     TUYA_CONNECT_TIMEOUT_MS,
     TUYA_MAX_RETRIES,
+    TUYA_OPERATION_TIMEOUT_MS,
 } from "../config/index.js";
 import { createLogger } from "../shared/logger.js";
 
@@ -51,6 +52,21 @@ function forceDisconnect() {
     }
 }
 
+// Wrapper z timeout dla operacji (device.get/set mogą wisieć)
+function withTimeout(promise, ms) {
+    let timeoutId;
+    const timeoutPromise = new Promise((_, reject) => {
+        timeoutId = setTimeout(
+            () => reject(new Error("Operation timeout")),
+            ms
+        );
+    });
+
+    return Promise.race([promise, timeoutPromise]).finally(() => {
+        clearTimeout(timeoutId);
+    });
+}
+
 // Zapewnij połączenie (lazy connect z Promise)
 async function ensureConnected() {
     if (isConnected) return true;
@@ -74,14 +90,18 @@ async function ensureConnected() {
     return connectionPromise;
 }
 
-// Helper - wykonaj operację na urządzeniu z retry
+// Helper - wykonaj operację na urządzeniu z retry i timeout
 async function withDevice(operation) {
     let lastError;
 
     for (let attempt = 1; attempt <= TUYA_MAX_RETRIES; attempt++) {
         try {
             await ensureConnected();
-            const result = await operation();
+            // Timeout na operację - device.get/set mogą wisieć przy zombie connection
+            const result = await withTimeout(
+                operation(),
+                TUYA_OPERATION_TIMEOUT_MS
+            );
             return { success: true, ...result };
         } catch (err) {
             lastError = err;
@@ -93,7 +113,7 @@ async function withDevice(operation) {
             forceDisconnect();
 
             if (attempt < TUYA_MAX_RETRIES) {
-                await new Promise((r) => setTimeout(r, 500));
+                await new Promise((r) => setTimeout(r, 1000));
             }
         }
     }

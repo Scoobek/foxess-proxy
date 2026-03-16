@@ -12,11 +12,12 @@ export const CRON_SUNRISE_SUNSET = "1 0 * * *"; // codziennie o 00:01
 export const SUNRISE_OFFSET_MINUTES = 90;
 
 // Interwał odpytywania API (3.5 minuty)
-export const POLLING_INTERVAL_MS = 1.5 * 60 * 1000;
+export const POLLING_INTERVAL_MS = 3.5 * 60 * 1000;
 
 // Tuya - konfiguracja połączenia
 export const TUYA_CONNECT_TIMEOUT_MS = 10000;
-export const TUYA_MAX_RETRIES = 2;
+export const TUYA_OPERATION_TIMEOUT_MS = 8000;
+export const TUYA_MAX_RETRIES = 3;
 
 // Zmienne do pobierania z FoxESS API (realtime)
 export const REALTIME_VARIABLES = [
