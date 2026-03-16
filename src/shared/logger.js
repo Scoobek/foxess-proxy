@@ -9,8 +9,13 @@ import fs from "fs";
 import { fileURLToPath } from "url";
 import { LOGS_DIR_NAME, TIMESTAMP_FORMAT, MAX_LOG_AGE } from "../config/logger.js";
 
-// Ścieżka do katalogu logów (root projektu + nazwa katalogu z config)
-const logsDir = path.join(path.dirname(fileURLToPath(import.meta.url)), "../..", LOGS_DIR_NAME);
+// Ścieżka do katalogu logów
+// - prod (bundle): obok skryptu dist/logs/
+// - dev: w root projektu
+const scriptDir = path.dirname(fileURLToPath(import.meta.url));
+const logsDir = process.env.NODE_ENV === "production"
+    ? path.join(scriptDir, LOGS_DIR_NAME)
+    : path.join(process.cwd(), LOGS_DIR_NAME);
 
 // Utwórz katalog logs jeśli nie istnieje
 if (!fs.existsSync(logsDir)) {
