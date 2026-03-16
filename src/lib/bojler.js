@@ -2,7 +2,7 @@
  * Bojler - logika auto-control
  */
 
-import { turnOnBojler, turnOffBojler, getBojlerStatus } from "./tuya.js";
+import { getBojler } from "../config/tuya.js";
 import { BOJLER_POWER_THRESHOLD } from "../config/index.js";
 import { updateBojlerState } from "../shared/state.js";
 import { createLogger } from "../shared/logger.js";
@@ -12,7 +12,7 @@ const log = createLogger("bojler");
 // Inicjalizacja stanu bojlera przy starcie aplikacji
 export async function initBojlerState() {
     log.info("Pobieranie aktualnego stanu bojlera...");
-    const result = await getBojlerStatus();
+    const result = await getBojler().getStatus();
 
     if (result.success) {
         updateBojlerState({
@@ -88,7 +88,8 @@ export function checkBojlerConditions(datas, isOn) {
  * @returns {Promise<{success: boolean}>}
  */
 async function setBojlerState(isOn, reason) {
-    const result = isOn ? await turnOnBojler() : await turnOffBojler();
+    const device = getBojler();
+    const result = isOn ? await device.turnOn() : await device.turnOff();
     if (result.success) {
         updateBojlerState({
             isOn,
@@ -105,7 +106,7 @@ async function setBojlerState(isOn, reason) {
  * @returns {Promise<{success: boolean, wasOn: boolean}>}
  */
 export async function ensureBojlerOff(reason) {
-    const status = await getBojlerStatus();
+    const status = await getBojler().getStatus();
     if (!status.success) {
         log.error({ error: status.error }, "Nie można pobrać stanu bojlera");
         return { success: false, wasOn: false };
@@ -122,7 +123,7 @@ export async function ensureBojlerOff(reason) {
 
 export async function handleBojlerAutoControl(datas) {
     // 1. Pobierz aktualny stan z urządzenia (source of truth)
-    const status = await getBojlerStatus();
+    const status = await getBojler().getStatus();
     if (!status.success) {
         log.error({ error: status.error }, "Nie można pobrać stanu bojlera");
         return;
