@@ -11,12 +11,11 @@ const DEVICE_CONFIGS = {
         key: process.env.TUYA_BOJLER_KEY,
         version: "3.3",
     },
-    // Tutaj dodasz kolejne urządzenia:
-    // grzejnik: {
-    //     id: process.env.TUYA_GRZEJNIK_ID,
-    //     key: process.env.TUYA_GRZEJNIK_KEY,
-    //     version: "3.3",
-    // },
+    podswietlenieDomu: {
+        id: process.env.TUYA_LAMPKI_ID,
+        key: process.env.TUYA_LAMPKI_KEY,
+        version: "3.3",
+    },
 };
 
 // Lazy-init - instancje tworzone przy pierwszym użyciu
@@ -43,3 +42,9 @@ export function getDevice(name) {
  * @returns {TuyaDevice}
  */
 export const getBojler = () => getDevice("bojler");
+
+/**
+ * Pobiera instancję podświetlenia domu (wygodny helper)
+ * @returns {TuyaDevice}
+ */
+export const getPodswietlenieDomu = () => getDevice("podswietlenieDomu");
