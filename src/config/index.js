@@ -8,8 +8,12 @@ export const BOJLER_POWER_THRESHOLD = 1.65; // kW
 // Cron schedules
 export const CRON_SUNRISE_SUNSET = "1 0 * * *"; // codziennie o 00:01
 
-// Offset od sunrise w minutach (1.5h = 90 min)
+// Offset od sunrise w minutach (1.5h = 90 min) - bojler
 export const SUNRISE_OFFSET_MINUTES = 90;
+
+// Offsety dla podświetlenia domu (lampki)
+export const LAMPKI_SUNSET_OFFSET_MINUTES = 60; // włączenie 60 min po sunset
+export const LAMPKI_SUNRISE_OFFSET_MINUTES = 35; // wyłączenie 35 min przed sunrise
 
 // Interwał odpytywania API (3.5 minuty)
 export const POLLING_INTERVAL_MS = 3.5 * 60 * 1000;
