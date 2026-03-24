@@ -5,7 +5,7 @@
 import { handleBojlerAutoControl } from "../../lib/bojler.js";
 import { fetchRealtimeData } from "../services/foxessService.js";
 import { REALTIME_VARIABLES } from "../../config/index.js";
-import { updateBojlerState } from "../../shared/state.js";
+import { updateDeviceState } from "../../shared/state.js";
 import { createLogger } from "../../shared/logger.js";
 
 const log = createLogger("foxessDataManager");
@@ -38,7 +38,7 @@ export function processRealtimeData(data) {
     const surplus =
         pvPower !== null && loadsPower !== null ? pvPower - loadsPower : null;
 
-    updateBojlerState({
+    updateDeviceState("bojler", {
         pvPower,
         loadsPower,
         surplus,

@@ -3,13 +3,13 @@
  */
 
 import { Router } from "express";
-import { bojlerState } from "../shared/state.js";
+import { appState } from "../shared/state.js";
 
 const router = Router();
 
 // GET /api/bojler/status - status bojlera
-router.get("/status", (req, res) => {
-    res.json(bojlerState);
+router.get("/status", (_req, res) => {
+    res.json(appState);
 });
 
 export default router;

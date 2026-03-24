@@ -6,7 +6,7 @@
  * - Planowanie stopu pullingu (sunset)
  */
 
-import { updateBojlerState } from "../../shared/state.js";
+import { updateDeviceState } from "../../shared/state.js";
 import { ensureBojlerOff } from "../../lib/bojler.js";
 import {
     startPolling,
@@ -48,7 +48,7 @@ function clearAllTimers() {
  */
 function handleInActivityWindow(sunsetMinutes, pollingStopsAt) {
     log.info("W oknie aktywności - natychmiastowy start");
-    updateBojlerState({ pollingStartsAt: null, pollingStopsAt });
+    updateDeviceState("bojler", { pollingStartsAt: null, pollingStopsAt });
     startPolling();
 
     const msToStop = msUntilMinutes(sunsetMinutes);
@@ -71,7 +71,7 @@ function handleBeforeWindow(
     pollingStartsAt,
     pollingStopsAt
 ) {
-    updateBojlerState({ pollingStartsAt, pollingStopsAt });
+    updateDeviceState("bojler", { pollingStartsAt, pollingStopsAt });
 
     const msToStart = msUntilMinutes(startMinutes);
     const msToStop = msUntilMinutes(sunsetMinutes);
@@ -99,7 +99,7 @@ function handleBeforeWindow(
  * Obsługuje przypadek po sunset - polling nieaktywny do jutra
  */
 async function handleAfterSunset() {
-    updateBojlerState({
+    updateDeviceState("bojler", {
         pollingStartsAt: null,
         pollingStopsAt: null,
         nextPollAt: null,

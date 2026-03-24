@@ -4,7 +4,7 @@
 
 import { getBojler } from "../config/tuya.js";
 import { BOJLER_POWER_THRESHOLD } from "../config/index.js";
-import { updateBojlerState } from "../shared/state.js";
+import { updateDeviceState } from "../shared/state.js";
 import { createLogger } from "../shared/logger.js";
 
 const log = createLogger("bojler");
@@ -15,7 +15,7 @@ export async function initBojlerState() {
     const result = await getBojler().getStatus();
 
     if (result.success) {
-        updateBojlerState({
+        updateDeviceState("bojler", {
             isOn: result.isOn,
             lastCheck: new Date().toISOString(),
         });
@@ -43,7 +43,7 @@ export function checkBojlerConditions(datas, isOn) {
     const surplus = pvPower - loadsPower;
 
     // Aktualizuj stan z danymi PV
-    updateBojlerState({
+    updateDeviceState("bojler", {
         pvPower,
         loadsPower,
         surplus,
@@ -91,7 +91,7 @@ async function setBojlerState(isOn, reason) {
     const device = getBojler();
     const result = isOn ? await device.turnOn() : await device.turnOff();
     if (result.success) {
-        updateBojlerState({
+        updateDeviceState("bojler", {
             isOn,
             lastChange: new Date().toISOString(),
             ...(isOn ? { turnedOnBy: reason } : { turnedOffBy: reason }),
@@ -130,7 +130,7 @@ export async function handleBojlerAutoControl(datas) {
     }
 
     // 2. Synchronizuj stan w aplikacji
-    updateBojlerState({ isOn: status.isOn });
+    updateDeviceState("bojler", { isOn: status.isOn });
 
     // 3. Sprawdź warunki z uwzględnieniem aktualnego stanu
     const shouldTurnOn = checkBojlerConditions(datas, status.isOn);

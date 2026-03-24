@@ -6,24 +6,53 @@ import { createLogger } from "./logger.js";
 
 const log = createLogger("state");
 
-export const bojlerState = {
-    isOn: false,
-    lastChange: null,
-    lastCheck: null,
-    turnedOnBy: null, // 'auto' | 'manual' | null
-    turnedOffBy: null, // 'auto' | 'sunset' | 'manual' | null
-    pvPower: 0,
-    loadsPower: 0,
-    surplus: 0,
+export const appState = {
+    // Współdzielone - dane słoneczne
     sunrise: null,
     sunset: null,
-    isPolling: false,
-    pollingStartsAt: null,
-    pollingStopsAt: null,
-    nextPollAt: null,
+
+    // Urządzenia
+    bojler: {
+        isOn: false,
+        lastChange: null,
+        lastCheck: null,
+        turnedOnBy: null, // 'auto' | 'manual' | null
+        turnedOffBy: null, // 'auto' | 'sunset' | 'manual' | null
+        pvPower: 0,
+        loadsPower: 0,
+        surplus: 0,
+        isPolling: false,
+        pollingStartsAt: null,
+        pollingStopsAt: null,
+        nextPollAt: null,
+    },
+    podswietlenieDomu: {
+        isOn: false,
+        lastChange: null,
+        turnedOnBy: null, // 'auto' | 'manual' | null
+        turnedOffBy: null, // 'auto' | 'sunrise' | 'manual' | null
+    },
 };
 
-export function updateBojlerState(updates) {
-    Object.assign(bojlerState, updates);
-    log.debug({ keys: Object.keys(updates) }, "Aktualizacja stanu");
+/**
+ * Aktualizuje współdzielony stan aplikacji (sunrise, sunset)
+ * @param {Object} updates - pola do aktualizacji
+ */
+export function updateAppState(updates) {
+    Object.assign(appState, updates);
+    log.debug({ keys: Object.keys(updates) }, "Aktualizacja stanu app");
+}
+
+/**
+ * Aktualizuje stan konkretnego urządzenia
+ * @param {string} device - nazwa urządzenia ('bojler' | 'podswietlenieDomu')
+ * @param {Object} updates - pola do aktualizacji
+ */
+export function updateDeviceState(device, updates) {
+    if (!appState[device]) {
+        log.error({ device }, "Nieznane urządzenie");
+        return;
+    }
+    Object.assign(appState[device], updates);
+    log.debug({ device, keys: Object.keys(updates) }, "Aktualizacja stanu urządzenia");
 }

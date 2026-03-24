@@ -7,7 +7,7 @@
  * - Aktualizację stanu pollingu
  */
 
-import { updateBojlerState } from "../../shared/state.js";
+import { updateDeviceState } from "../../shared/state.js";
 import { refreshRealtimeData } from "./foxessDataManager.js";
 import { createLogger } from "../../shared/logger.js";
 
@@ -28,7 +28,7 @@ export function startPolling() {
     }
 
     log.info("Start polling");
-    updateBojlerState({
+    updateDeviceState("bojler", {
         isPolling: true,
         pollingStartsAt: null,
         nextPollAt: calcNextPollAt(POLLING_INTERVAL_MS),
@@ -44,7 +44,7 @@ export function startPolling() {
         } catch (error) {
             log.error({ err: error }, "Błąd w polling interval");
         }
-        updateBojlerState({ nextPollAt: calcNextPollAt(POLLING_INTERVAL_MS) });
+        updateDeviceState("bojler", { nextPollAt: calcNextPollAt(POLLING_INTERVAL_MS) });
     }, POLLING_INTERVAL_MS);
 
     return { success: true };
@@ -63,7 +63,7 @@ export function stopPolling() {
     log.info("Stop polling");
     clearInterval(pollingInterval);
     pollingInterval = null;
-    updateBojlerState({
+    updateDeviceState("bojler", {
         isPolling: false,
         pollingStopsAt: null,
         nextPollAt: null,
