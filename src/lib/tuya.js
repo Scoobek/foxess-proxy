@@ -1,11 +1,13 @@
 /**
  * TuyAPI - komunikacja z urządzeniami Tuya
- * Persistent connection - połączenie utrzymywane, reconnect przy błędach
+ * Hybrid connection - połączenie utrzymywane z idle timeout (5 min)
+ * Auto-disconnect przy braku aktywności, reconnect przy błędach
  */
 
 import TuyAPI from "tuyapi";
 import {
     TUYA_CONNECT_TIMEOUT_MS,
+    TUYA_IDLE_TIMEOUT_MS,
     TUYA_MAX_RETRIES,
     TUYA_OPERATION_TIMEOUT_MS,
 } from "../config/index.js";
@@ -21,6 +23,7 @@ export class TuyaDevice {
         this.device = new TuyAPI({ id, key, version });
         this.isConnected = false;
         this.connectionPromise = null;
+        this.idleTimer = null;
 
         this._setupListeners();
     }
@@ -45,6 +48,7 @@ export class TuyaDevice {
     }
 
     _forceDisconnect() {
+        this._clearIdleTimer();
         this.isConnected = false;
         this.connectionPromise = null;
         try {
@@ -52,6 +56,21 @@ export class TuyaDevice {
         } catch {
             // ignoruj
         }
+    }
+
+    _clearIdleTimer() {
+        if (this.idleTimer) {
+            clearTimeout(this.idleTimer);
+            this.idleTimer = null;
+        }
+    }
+
+    _resetIdleTimer() {
+        this._clearIdleTimer();
+        this.idleTimer = setTimeout(() => {
+            this.log.debug("Idle timeout - rozłączam");
+            this.disconnect();
+        }, TUYA_IDLE_TIMEOUT_MS);
     }
 
     _withTimeout(promise, ms) {
@@ -99,6 +118,7 @@ export class TuyaDevice {
                     operation(),
                     TUYA_OPERATION_TIMEOUT_MS
                 );
+                this._resetIdleTimer();
                 return { success: true, ...result };
             } catch (err) {
                 lastError = err;
@@ -142,7 +162,10 @@ export class TuyaDevice {
     }
 
     disconnect() {
+        this._clearIdleTimer();
         if (this.isConnected) {
+            this.isConnected = false;
+            this.connectionPromise = null;
             try {
                 this.device.disconnect();
             } catch {
