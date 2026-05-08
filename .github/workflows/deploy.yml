@@ -9,12 +9,12 @@ jobs:
         steps:
             - name: Pull latest code
               run: |
-                  cd /projects/foxess-proxy
+                  cd home/scoobek/projects/foxess-proxy
                   git pull origin main
 
             - name: Install dependencies
               run: |
-                  cd /projects/foxess-proxy
+                  cd home/scoobek/projects/foxess-proxy
                   npm ci
 
             - name: Restart service
