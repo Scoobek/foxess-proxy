@@ -17,5 +17,10 @@ jobs:
                   cd /home/scoobek/projects/foxess-proxy
                   npm ci
 
+            - name: Build
+              run: |
+                  cd /home/scoobek/projects/foxess-proxy
+                  npm run build
+
             - name: Restart service
-              run: sudo systemctl restart actions.runner.Scoobek-foxess-proxy.homeserver.service
+              run: sudo systemctl restart foxess-proxy
