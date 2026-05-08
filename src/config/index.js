@@ -4,6 +4,10 @@
 
 export const PORT = 3000;
 export const BOJLER_POWER_THRESHOLD = 1.65; // kW
+export const BOJLER_TOLERANCY_PERCENTAGE = 0.2; // percent
+
+export const BOJLER_ACTIVATION_THRESHOLD =
+    BOJLER_POWER_THRESHOLD * (1 - BOJLER_TOLERANCY_PERCENTAGE);
 
 // Cron schedules
 export const CRON_SUNRISE_SUNSET = "1 0 * * *"; // codziennie o 00:01
@@ -12,7 +16,7 @@ export const CRON_SUNRISE_SUNSET = "1 0 * * *"; // codziennie o 00:01
 export const SUNRISE_OFFSET_MINUTES = 90;
 
 // Offsety dla podświetlenia domu (lampki)
-export const LAMPKI_SUNSET_OFFSET_MINUTES = 60; // włączenie 60 min po sunset
+export const LAMPKI_SUNSET_OFFSET_MINUTES = 12; // włączenie 12min po sunset
 export const LAMPKI_SUNRISE_OFFSET_MINUTES = 35; // wyłączenie 35 min przed sunrise
 
 // Interwał odpytywania API (3.5 minuty)
