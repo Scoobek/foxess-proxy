@@ -3,7 +3,10 @@
  */
 
 import { getBojler } from "../config/tuya.js";
-import { BOJLER_POWER_THRESHOLD } from "../config/index.js";
+import {
+    BOJLER_ACTIVATION_THRESHOLD,
+    BOJLER_POWER_THRESHOLD,
+} from "../config/index.js";
 import { updateDeviceState } from "../shared/state.js";
 import { createLogger } from "../shared/logger.js";
 
@@ -66,8 +69,8 @@ export function checkBojlerConditions(datas, isOn) {
     } else {
         // Bojler wyłączony - sprawdź czy mamy wystarczającą moc i nadwyżkę
         shouldTurnOn =
-            pvPower >= BOJLER_POWER_THRESHOLD &&
-            surplus >= BOJLER_POWER_THRESHOLD;
+            pvPower >= BOJLER_ACTIVATION_THRESHOLD &&
+            surplus >= BOJLER_ACTIVATION_THRESHOLD;
         if (shouldTurnOn) {
             log.info("Warunki spełnione - można uruchomić bojler");
         } else {
