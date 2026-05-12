@@ -3,17 +3,16 @@
  * Interfejs device registry: { initDevice, planDay }
  */
 
-import {
-    initLampkiState,
-    ensureLampkiOn,
-    ensureLampkiOff,
-} from "./index.js";
-import { createLogger } from "../shared/logger.js";
+import { initLampkiState, ensureLampkiOn, ensureLampkiOff } from "./index.js";
+import { createLogger } from "../../shared/logger.js";
 import {
     LAMPKI_SUNSET_OFFSET_MINUTES,
     LAMPKI_SUNRISE_OFFSET_MINUTES,
-} from "../config/index.js";
-import { formatMinutesAsTime, msUntilMinutes } from "../shared/utils/time.js";
+} from "../../config/index.js";
+import {
+    formatMinutesAsTime,
+    msUntilMinutes,
+} from "../../shared/utils/time.js";
 
 const log = createLogger("podswietlenieDomu");
 
@@ -49,7 +48,9 @@ export async function planDay(sunriseMin, sunsetMin, nowMin) {
         }, msUntilMinutes(lampkiOnMin));
         log.info(
             {
-                minutesUntilOff: Math.round(msUntilMinutes(lampkiOffMin) / 60000),
+                minutesUntilOff: Math.round(
+                    msUntilMinutes(lampkiOffMin) / 60000
+                ),
                 minutesUntilOn: Math.round(msUntilMinutes(lampkiOnMin) / 60000),
             },
             "[lampki] Timery zaplanowane"

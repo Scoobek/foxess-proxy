@@ -2,13 +2,13 @@
  * Bojler - sterowanie urządzeniem i logika auto-control
  */
 
-import { getBojler } from "../config/tuya.js";
+import { getBojler } from "../../config/tuya.js";
 import {
     BOJLER_ACTIVATION_THRESHOLD,
     BOJLER_POWER_THRESHOLD,
-} from "../config/index.js";
-import { updateDeviceState } from "../shared/state.js";
-import { createLogger } from "../shared/logger.js";
+} from "../../config/index.js";
+import { updateDeviceState } from "../../shared/state.js";
+import { createLogger } from "../../shared/logger.js";
 
 const log = createLogger("bojler");
 
@@ -23,7 +23,10 @@ export async function initBojlerState() {
         });
         log.info({ isOn: result.isOn }, "Stan bojlera zainicjalizowany");
     } else {
-        log.error({ error: result.error }, "Nie udało się pobrać stanu bojlera");
+        log.error(
+            { error: result.error },
+            "Nie udało się pobrać stanu bojlera"
+        );
     }
 
     return result;

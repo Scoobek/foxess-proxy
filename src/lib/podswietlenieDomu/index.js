@@ -2,9 +2,9 @@
  * Podświetlenie domu - sterowanie urządzeniem
  */
 
-import { getPodswietlenieDomu } from "../config/tuya.js";
-import { updateDeviceState } from "../shared/state.js";
-import { createLogger } from "../shared/logger.js";
+import { getPodswietlenieDomu } from "../../config/tuya.js";
+import { updateDeviceState } from "../../shared/state.js";
+import { createLogger } from "../../shared/logger.js";
 
 const log = createLogger("podswietlenieDomu");
 

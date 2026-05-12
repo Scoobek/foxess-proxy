@@ -11,19 +11,19 @@ import {
 import {
     startPolling,
     stopPolling,
-} from "../worker/managers/pollingManager.js";
-import { refreshRealtimeData } from "../worker/managers/foxessDataManager.js";
-import { updateDeviceState } from "../shared/state.js";
-import { createLogger } from "../shared/logger.js";
+} from "../../worker/managers/pollingManager.js";
+import { refreshRealtimeData } from "../../worker/managers/foxessDataManager.js";
+import { updateDeviceState } from "../../shared/state.js";
+import { createLogger } from "../../shared/logger.js";
 import {
     SUNRISE_OFFSET_MINUTES,
     POLLING_INTERVAL_MS,
-} from "../config/index.js";
+} from "../../config/index.js";
 import {
     formatMinutesAsTime,
     msUntilMinutes,
     calcNextPollAt,
-} from "../shared/utils/time.js";
+} from "../../shared/utils/time.js";
 
 const log = createLogger("bojler");
 
@@ -52,7 +52,9 @@ export async function planDay(sunriseMin, sunsetMin, nowMin) {
         ) {
             await handleBojlerAutoControl(result.data.result[0].datas);
         }
-        updateDeviceState("bojler", { nextPollAt: calcNextPollAt(POLLING_INTERVAL_MS) });
+        updateDeviceState("bojler", {
+            nextPollAt: calcNextPollAt(POLLING_INTERVAL_MS),
+        });
     };
 
     const doStart = () => {
