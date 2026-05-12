@@ -18,5 +18,5 @@ export async function startScheduler() {
     sunriseSunsetJob.start();
 
     const status = getTimerStatus();
-    log.info({ cron: CRON_SUNRISE_SUNSET, polling: status.isPolling }, "Scheduler uruchomiony");
+    log.info({ cron: CRON_SUNRISE_SUNSET, activeDevices: status.activeDevices }, "Scheduler uruchomiony");
 }
