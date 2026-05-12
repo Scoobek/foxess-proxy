@@ -1,9 +1,8 @@
 /**
- * Bootstrap - inicjalizacja stanów workera
+ * Bootstrap - inicjalizacja urządzeń przy starcie aplikacji
  */
 
-import { initBojlerState } from "../../lib/bojler.js";
-import { initLampkiState } from "../../lib/podswietlenieDomu.js";
+import { devices } from "../../lib/devices.js";
 import { createLogger } from "../../shared/logger.js";
 
 const log = createLogger("bootstrap");
@@ -11,9 +10,9 @@ const log = createLogger("bootstrap");
 export async function initWorker() {
     log.info("Inicjalizacja workera...");
 
-    // Pobierz aktualny stan urządzeń
-    await initBojlerState();
-    await initLampkiState();
+    for (const device of devices) {
+        await device.initDevice();
+    }
 
     log.info("Worker zainicjalizowany");
 }
