@@ -1,16 +1,13 @@
 /**
- * Podświetlenie domu - logika sterowania lampkami
+ * Podświetlenie domu - sterowanie urządzeniem
  */
 
-import { getPodswietlenieDomu } from "../config/tuya.js";
-import { updateDeviceState } from "../shared/state.js";
-import { createLogger } from "../shared/logger.js";
+import { getPodswietlenieDomu } from "../../config/tuya.js";
+import { updateDeviceState } from "../../shared/state.js";
+import { createLogger } from "../../shared/logger.js";
 
 const log = createLogger("podswietlenieDomu");
 
-/**
- * Inicjalizacja stanu lampek przy starcie aplikacji
- */
 export async function initLampkiState() {
     log.info("Pobieranie aktualnego stanu lampek...");
     const result = await getPodswietlenieDomu().getStatus();
@@ -28,12 +25,6 @@ export async function initLampkiState() {
     return result;
 }
 
-/**
- * Ustawia stan lampek (włącza/wyłącza) i aktualizuje state
- * @param {boolean} isOn - docelowy stan
- * @param {string} reason - powód zmiany ('auto' | 'manual')
- * @returns {Promise<{success: boolean}>}
- */
 async function setLampkiState(isOn, reason) {
     const device = getPodswietlenieDomu();
     const result = isOn ? await device.turnOn() : await device.turnOff();
@@ -52,11 +43,6 @@ async function setLampkiState(isOn, reason) {
     return result;
 }
 
-/**
- * Włącza lampki jeśli są wyłączone
- * @param {string} reason - powód włączenia ('auto' | 'manual')
- * @returns {Promise<{success: boolean, wasOff: boolean}>}
- */
 export async function ensureLampkiOn(reason) {
     const status = await getPodswietlenieDomu().getStatus();
     if (!status.success) {
@@ -73,11 +59,6 @@ export async function ensureLampkiOn(reason) {
     return { success: result.success, wasOff: true };
 }
 
-/**
- * Wyłącza lampki jeśli są włączone
- * @param {string} reason - powód wyłączenia ('auto' | 'sunrise' | 'manual')
- * @returns {Promise<{success: boolean, wasOn: boolean}>}
- */
 export async function ensureLampkiOff(reason) {
     const status = await getPodswietlenieDomu().getStatus();
     if (!status.success) {

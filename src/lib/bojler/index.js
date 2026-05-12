@@ -1,18 +1,17 @@
 /**
- * Bojler - logika auto-control
+ * Bojler - sterowanie urządzeniem i logika auto-control
  */
 
-import { getBojler } from "../config/tuya.js";
+import { getBojler } from "../../config/tuya.js";
 import {
     BOJLER_ACTIVATION_THRESHOLD,
     BOJLER_POWER_THRESHOLD,
-} from "../config/index.js";
-import { updateDeviceState } from "../shared/state.js";
-import { createLogger } from "../shared/logger.js";
+} from "../../config/index.js";
+import { updateDeviceState } from "../../shared/state.js";
+import { createLogger } from "../../shared/logger.js";
 
 const log = createLogger("bojler");
 
-// Inicjalizacja stanu bojlera przy starcie aplikacji
 export async function initBojlerState() {
     log.info("Pobieranie aktualnego stanu bojlera...");
     const result = await getBojler().getStatus();
@@ -33,19 +32,12 @@ export async function initBojlerState() {
     return result;
 }
 
-/**
- * Sprawdza warunki włączenia/wyłączenia bojlera
- * @param {Array} datas - dane z API (pvPower, loadsPower)
- * @param {boolean} isOn - aktualny stan bojlera
- * @returns {boolean} shouldTurnOn - czy bojler powinien być włączony
- */
 export function checkBojlerConditions(datas, isOn) {
     const pvPower = datas.find((d) => d.variable === "pvPower")?.value ?? 0;
     const loadsPower =
         datas.find((d) => d.variable === "loadsPower")?.value ?? 0;
     const surplus = pvPower - loadsPower;
 
-    // Aktualizuj stan z danymi PV
     updateDeviceState("bojler", {
         pvPower,
         loadsPower,
@@ -58,8 +50,6 @@ export function checkBojlerConditions(datas, isOn) {
     let shouldTurnOn;
 
     if (isOn) {
-        // Bojler działa - loadsPower zawiera już jego zużycie
-        // Wyłącz tylko gdy surplus ujemny (brak nadwyżki)
         shouldTurnOn = surplus >= 0;
         if (!shouldTurnOn) {
             log.info({ surplus }, "Brak nadwyżki - wyłączam bojler");
@@ -67,7 +57,6 @@ export function checkBojlerConditions(datas, isOn) {
             log.info({ surplus }, "Praca bez zmian");
         }
     } else {
-        // Bojler wyłączony - sprawdź czy mamy wystarczającą moc i nadwyżkę
         shouldTurnOn =
             pvPower >= BOJLER_ACTIVATION_THRESHOLD &&
             surplus >= BOJLER_ACTIVATION_THRESHOLD;
@@ -84,12 +73,6 @@ export function checkBojlerConditions(datas, isOn) {
     return shouldTurnOn;
 }
 
-/**
- * Ustawia stan bojlera (włącza/wyłącza) i aktualizuje state
- * @param {boolean} isOn - docelowy stan
- * @param {string} reason - powód zmiany ('auto' | 'sunset' | 'manual')
- * @returns {Promise<{success: boolean}>}
- */
 async function setBojlerState(isOn, reason) {
     const device = getBojler();
     const result = isOn ? await device.turnOn() : await device.turnOff();
@@ -103,11 +86,6 @@ async function setBojlerState(isOn, reason) {
     return result;
 }
 
-/**
- * Wyłącza bojler jeśli jest włączony
- * @param {string} reason - powód wyłączenia ('auto' | 'sunset' | 'manual')
- * @returns {Promise<{success: boolean, wasOn: boolean}>}
- */
 export async function ensureBojlerOff(reason) {
     const status = await getBojler().getStatus();
     if (!status.success) {
@@ -125,20 +103,16 @@ export async function ensureBojlerOff(reason) {
 }
 
 export async function handleBojlerAutoControl(datas) {
-    // 1. Pobierz aktualny stan z urządzenia (source of truth)
     const status = await getBojler().getStatus();
     if (!status.success) {
         log.error({ error: status.error }, "Nie można pobrać stanu bojlera");
         return;
     }
 
-    // 2. Synchronizuj stan w aplikacji
     updateDeviceState("bojler", { isOn: status.isOn });
 
-    // 3. Sprawdź warunki z uwzględnieniem aktualnego stanu
     const shouldTurnOn = checkBojlerConditions(datas, status.isOn);
 
-    // 4. Wykonaj akcję jeśli stan docelowy różni się od aktualnego
     if (shouldTurnOn && !status.isOn) {
         await setBojlerState(true, "auto");
     } else if (!shouldTurnOn && status.isOn) {

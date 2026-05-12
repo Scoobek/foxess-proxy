@@ -123,7 +123,11 @@ export class TuyaDevice {
             } catch (err) {
                 lastError = err;
                 this.log.warn(
-                    { error: err.message, attempt, maxRetries: TUYA_MAX_RETRIES },
+                    {
+                        error: err.message,
+                        attempt,
+                        maxRetries: TUYA_MAX_RETRIES,
+                    },
                     "Błąd operacji - próba retry"
                 );
                 this._forceDisconnect();
@@ -134,7 +138,10 @@ export class TuyaDevice {
             }
         }
 
-        this.log.error({ error: lastError.message }, "Błąd operacji po wszystkich próbach");
+        this.log.error(
+            { error: lastError.message },
+            "Błąd operacji po wszystkich próbach"
+        );
         return { success: false, error: lastError.message };
     }
 
