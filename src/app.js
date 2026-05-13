@@ -4,7 +4,8 @@
  */
 
 import "dotenv/config";
-import "./config/process.js";
+
+process.title = process.env.APP_NAME;
 
 import { createServer } from "./api/server.js";
 import { initWorker } from "./worker/orchestration/bootstrap.js";
