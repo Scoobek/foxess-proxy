@@ -2,11 +2,8 @@
  * Sunrise/Sunset Service - pobieranie czasów wschodu i zachodu słońca
  */
 
-import {
-    LOCATION_LAT,
-    LOCATION_LNG,
-    SUNRISE_SUNSET_API,
-} from "../../config/sunrisesunset.js";
+import { LOCATION_LAT, LOCATION_LNG } from "../../config/index.js";
+import { SUNRISE_SUNSET_API } from "../../config/sunrisesunset.js";
 import { createLogger } from "../../shared/logger.js";
 
 const log = createLogger("sunService");
