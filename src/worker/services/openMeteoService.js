@@ -17,7 +17,7 @@ export async function fetchWeather() {
         latitude: LOCATION_LAT,
         longitude: LOCATION_LNG,
         forecast_days: "1",
-        timezone: "Europe/Warsaw",
+        timezone: process.env.TZ,
         current: OPEN_METEO_CURRENT.join(","),
         hourly: OPEN_METEO_HOURLY.join(","),
     });
