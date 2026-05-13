@@ -10,6 +10,7 @@ import {
     TUYA_IDLE_TIMEOUT_MS,
     TUYA_MAX_RETRIES,
     TUYA_OPERATION_TIMEOUT_MS,
+    TUYA_RETRY_DELAY_MS,
 } from "../config/index.js";
 import { createLogger } from "../shared/logger.js";
 
@@ -47,17 +48,6 @@ export class TuyaDevice {
         });
     }
 
-    _forceDisconnect() {
-        this._clearIdleTimer();
-        this.isConnected = false;
-        this.connectionPromise = null;
-        try {
-            this.device.disconnect();
-        } catch {
-            // ignoruj
-        }
-    }
-
     _clearIdleTimer() {
         if (this.idleTimer) {
             clearTimeout(this.idleTimer);
@@ -69,8 +59,19 @@ export class TuyaDevice {
         this._clearIdleTimer();
         this.idleTimer = setTimeout(() => {
             this.log.debug("Idle timeout - rozłączam");
-            this.disconnect();
+            this._disconnect();
         }, TUYA_IDLE_TIMEOUT_MS);
+    }
+
+    _disconnect() {
+        this._clearIdleTimer();
+        this.isConnected = false;
+        this.connectionPromise = null;
+        try {
+            this.device._disconnect();
+        } catch {
+            // ignoruj
+        }
     }
 
     _withTimeout(promise, ms) {
@@ -98,6 +99,7 @@ export class TuyaDevice {
             try {
                 await this.device.find({ timeout: TUYA_CONNECT_TIMEOUT_MS });
                 await this.device.connect();
+                this.connectionPromise = null;
                 return true;
             } catch (err) {
                 this.connectionPromise = null;
@@ -130,10 +132,12 @@ export class TuyaDevice {
                     },
                     "Błąd operacji - próba retry"
                 );
-                this._forceDisconnect();
+                this._disconnect();
 
                 if (attempt < TUYA_MAX_RETRIES) {
-                    await new Promise((r) => setTimeout(r, 1000));
+                    await new Promise((r) =>
+                        setTimeout(r, TUYA_RETRY_DELAY_MS)
+                    );
                 }
             }
         }
@@ -166,18 +170,5 @@ export class TuyaDevice {
             const isOn = await this.device.get({ dps: 1 });
             return { isOn };
         });
-    }
-
-    disconnect() {
-        this._clearIdleTimer();
-        if (this.isConnected) {
-            this.isConnected = false;
-            this.connectionPromise = null;
-            try {
-                this.device.disconnect();
-            } catch {
-                // ignoruj
-            }
-        }
     }
 }
