@@ -3,6 +3,7 @@
  */
 
 import { fetchWeather } from "../services/openMeteoService.js";
+import { toLocalString } from "../../shared/utils/time.js";
 import { createLogger } from "../../shared/logger.js";
 
 const log = createLogger("rainCheck");
@@ -17,8 +18,10 @@ export async function checkRainExpected(hoursAhead = 3) {
     }
 
     const { hourly } = result;
-    const currentHour = new Date().toISOString().slice(0, 13);
-    const currentIndex = hourly.time.findIndex((t) => t.startsWith(currentHour));
+    const currentHour = toLocalString().slice(0, 13).replace(" ", "T");
+    const currentIndex = hourly.time.findIndex((t) =>
+        t.startsWith(currentHour)
+    );
 
     if (currentIndex === -1) {
         log.warn("Nie znaleziono bieżącej godziny w danych godzinowych");
@@ -32,7 +35,10 @@ export async function checkRainExpected(hoursAhead = 3) {
     const maxProbability = Math.max(...upcoming);
     const isRainExpected = maxProbability > RAIN_PROBABILITY_THRESHOLD;
 
-    log.debug({ isRainExpected, maxProbability, hoursAhead }, "Sprawdzono prognozę deszczu");
+    log.debug(
+        { isRainExpected, maxProbability, hoursAhead },
+        "Sprawdzono prognozę deszczu"
+    );
 
     return { success: true, isRainExpected, maxProbability };
 }

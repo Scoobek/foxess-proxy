@@ -21,15 +21,16 @@ export function parseTimeToMinutes(timeStr) {
     return hours * 60 + minutes;
 }
 
+export function toLocalString(date = new Date()) {
+    return date.toLocaleString("sv-SE", { timeZone: process.env.TZ });
+}
+
 /**
- * Pobiera aktualny czas Warsaw w minutach od północy
+ * Pobiera aktualny czas lokalny w minutach od północy
  */
-export function getCurrentWarsawMinutes() {
-    const now = new Date();
-    const warsawTime = new Date(
-        now.toLocaleString("en-US", { timeZone: "Europe/Warsaw" })
-    );
-    return warsawTime.getHours() * 60 + warsawTime.getMinutes();
+export function getCurrentMinutes() {
+    const [h, m] = toLocalString().slice(11, 16).split(":").map(Number);
+    return h * 60 + m;
 }
 
 /**
@@ -49,7 +50,7 @@ export function formatMinutesAsTime(minutes) {
  * @returns {number} milisekundy do celu (lub 0 jeśli już minął)
  */
 export function msUntilMinutes(targetMinutes) {
-    const nowMinutes = getCurrentWarsawMinutes();
+    const nowMinutes = getCurrentMinutes();
     const diffMinutes = targetMinutes - nowMinutes;
 
     if (diffMinutes <= 0) return 0;

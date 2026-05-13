@@ -8,7 +8,7 @@
 import { devices } from "../../lib/devices.js";
 import {
     parseTimeToMinutes,
-    getCurrentWarsawMinutes,
+    getCurrentMinutes,
     formatMinutesAsTime,
 } from "../../shared/utils/time.js";
 import { createLogger } from "../../shared/logger.js";
@@ -34,7 +34,7 @@ export async function scheduleDayTimers(sunrise, sunset) {
         return;
     }
 
-    const nowMin = getCurrentWarsawMinutes();
+    const nowMin = getCurrentMinutes();
     log.info({ now: formatMinutesAsTime(nowMin) }, "Planowanie dnia");
 
     for (const device of devices) {

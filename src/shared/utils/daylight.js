@@ -2,7 +2,7 @@
  * Daylight utilities - funkcje pomocnicze do sprawdzania pory dnia
  */
 
-import { getCurrentWarsawMinutes, parseTimeToMinutes } from "./time.js";
+import { getCurrentMinutes, parseTimeToMinutes } from "./time.js";
 
 /**
  * Sprawdza czy aktualny czas Warsaw jest w zakresie sunrise-sunset
@@ -11,7 +11,7 @@ import { getCurrentWarsawMinutes, parseTimeToMinutes } from "./time.js";
 export function getDaylightStatus(sunrise, sunset) {
     const sunriseMin = parseTimeToMinutes(sunrise);
     const sunsetMin = parseTimeToMinutes(sunset);
-    const nowMin = getCurrentWarsawMinutes();
+    const nowMin = getCurrentMinutes();
 
     if (sunriseMin === null || sunsetMin === null) {
         return "unknown";
