@@ -3,6 +3,9 @@
  */
 
 export const PORT = 3000;
+
+export const LOCATION_LAT = process.env.LOCATION_LAT;
+export const LOCATION_LNG = process.env.LOCATION_LNG;
 export const BOJLER_POWER_THRESHOLD = 1.65; // kW
 export const BOJLER_TOLERANCY_PERCENTAGE = 0.2; // percent
 
@@ -11,6 +14,7 @@ export const BOJLER_ACTIVATION_THRESHOLD =
 
 // Cron schedules
 export const CRON_SUNRISE_SUNSET = "1 0 * * *"; // codziennie o 00:01
+export const CRON_WEATHER = "*/30 * * * *"; // co 30 minut
 
 // Offset od sunrise w minutach (1.5h = 90 min) - bojler
 export const SUNRISE_OFFSET_MINUTES = 90;
