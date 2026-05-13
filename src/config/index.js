@@ -27,7 +27,6 @@ export const TUYA_CONNECT_TIMEOUT_MS = 10000;
 export const TUYA_OPERATION_TIMEOUT_MS = 8000;
 export const TUYA_MAX_RETRIES = 3;
 export const TUYA_IDLE_TIMEOUT_MS = 5 * 60 * 1000; // 5 minut bez aktywności = rozłączenie
-export const TUYA_RETRY_DELAY_MS = 1000;
 
 // Zmienne do pobierania z FoxESS API (realtime)
 export const REALTIME_VARIABLES = [
