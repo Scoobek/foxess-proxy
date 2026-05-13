@@ -3,6 +3,7 @@
  */
 
 import { createLogger } from "./logger.js";
+import { broadcast } from "./sse.js";
 
 const log = createLogger("state");
 
@@ -41,6 +42,7 @@ export const appState = {
 export function updateAppState(updates) {
     Object.assign(appState, updates);
     log.debug({ keys: Object.keys(updates) }, "Aktualizacja stanu app");
+    broadcast(appState);
 }
 
 /**
@@ -55,4 +57,5 @@ export function updateDeviceState(device, updates) {
     }
     Object.assign(appState[device], updates);
     log.debug({ device, keys: Object.keys(updates) }, "Aktualizacja stanu urządzenia");
+    broadcast(appState);
 }
