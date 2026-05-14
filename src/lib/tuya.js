@@ -6,7 +6,7 @@
 
 import TuyAPI from "tuyapi";
 import {
-    TUYA_CONNECT_TIMEOUT_MS,
+    TUYA_CONNECT_TIMEOUT_S,
     TUYA_IDLE_TIMEOUT_MS,
     TUYA_MAX_RETRIES,
     TUYA_OPERATION_TIMEOUT_MS,
@@ -21,6 +21,7 @@ export class TuyaDevice {
     constructor({ id, key, version, name }) {
         this.name = name;
         this.log = createLogger(`tuya:${name}`);
+        this._config = { id, key, version };
         this.device = new TuyAPI({ id, key, version });
         this.isConnected = false;
         this.connectionPromise = null;
@@ -68,7 +69,7 @@ export class TuyaDevice {
         this.isConnected = false;
         this.connectionPromise = null;
         try {
-            this.device._disconnect();
+            this.device.disconnect();
         } catch {
             // ignoruj
         }
@@ -97,7 +98,12 @@ export class TuyaDevice {
 
         this.connectionPromise = (async () => {
             try {
-                await this.device.find({ timeout: TUYA_CONNECT_TIMEOUT_MS });
+                this.device.removeAllListeners();
+                this.device = new TuyAPI(this._config);
+                this._setupListeners();
+                await this.device.find({
+                    timeout: TUYA_CONNECT_TIMEOUT_S,
+                });
                 await this.device.connect();
                 this.connectionPromise = null;
                 return true;
@@ -115,9 +121,11 @@ export class TuyaDevice {
 
         for (let attempt = 1; attempt <= TUYA_MAX_RETRIES; attempt++) {
             try {
-                await this._ensureConnected();
                 const result = await this._withTimeout(
-                    operation(),
+                    (async () => {
+                        await this._ensureConnected();
+                        return operation();
+                    })(),
                     TUYA_OPERATION_TIMEOUT_MS
                 );
                 this._resetIdleTimer();
