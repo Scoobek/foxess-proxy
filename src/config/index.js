@@ -27,7 +27,7 @@ export const LAMPKI_SUNRISE_OFFSET_MINUTES = 35; // wyłączenie 35 min przed su
 export const POLLING_INTERVAL_MS = 3.5 * 60 * 1000;
 
 // Tuya - konfiguracja połączenia
-export const TUYA_CONNECT_TIMEOUT_MS = 10000;
+export const TUYA_CONNECT_TIMEOUT_S = 10;
 export const TUYA_OPERATION_TIMEOUT_MS = 8000;
 export const TUYA_MAX_RETRIES = 3;
 export const TUYA_IDLE_TIMEOUT_MS = 5 * 60 * 1000; // 5 minut bez aktywności = rozłączenie
