@@ -1,4 +1,6 @@
 # .github/workflows/deploy.yml
+name: Build & Deploy foxess-proxy
+
 on:
     push:
         branches: [main]
@@ -8,19 +10,13 @@ jobs:
         runs-on: self-hosted
         steps:
             - name: Pull latest code
-              run: |
-                  cd /home/scoobek/projects/foxess-proxy
-                  git pull origin main
+              run: git -C /home/scoobek/projects/foxess-proxy pull origin main
 
             - name: Install dependencies
-              run: |
-                  cd /home/scoobek/projects/foxess-proxy
-                  npm ci
+              run: npm ci --prefix /home/scoobek/projects/foxess-proxy
 
             - name: Build
-              run: |
-                  cd /home/scoobek/projects/foxess-proxy
-                  npm run build
+              run: npm run build --prefix /home/scoobek/projects/foxess-proxy
 
             - name: Restart service
               run: sudo systemctl restart foxess-proxy
