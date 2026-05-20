@@ -20,7 +20,7 @@ export const CRON_WEATHER = "*/30 * * * *"; // co 30 minut
 export const SUNRISE_OFFSET_MINUTES = 90;
 
 // Offsety dla podświetlenia domu (lampki)
-export const LAMPKI_SUNSET_OFFSET_MINUTES = 12; // włączenie 12min po sunset
+export const LAMPKI_SUNSET_OFFSET_MINUTES = 24; // włączenie 12min po sunset
 export const LAMPKI_SUNRISE_OFFSET_MINUTES = 35; // wyłączenie 35 min przed sunrise
 
 // Interwał odpytywania API (3.5 minuty)
