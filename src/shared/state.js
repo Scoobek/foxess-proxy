@@ -33,6 +33,7 @@ export const appState = {
         turnedOnBy: null, // 'auto' | 'manual' | null
         turnedOffBy: null, // 'auto' | 'sunrise' | 'manual' | null
     },
+    ac: [],
 };
 
 /**
@@ -41,6 +42,22 @@ export const appState = {
  */
 export function updateAppState(updates) {
     Object.assign(appState, updates);
+    log.debug({ keys: Object.keys(updates) }, "Aktualizacja stanu app");
+    broadcast(appState);
+}
+
+/**
+ * Aktualizuje stan jednostki AC po id
+ * @param {string} id - id urządzenia AC
+ * @param {Object} updates - pola do aktualizacji
+ */
+export function updateAcState(id, updates) {
+    const unit = appState.ac.find((u) => u.id === id);
+    if (!unit) {
+        log.error({ id }, "Nieznane urządzenie AC");
+        return;
+    }
+    Object.assign(unit, updates);
     log.debug({ keys: Object.keys(updates) }, "Aktualizacja stanu app");
     broadcast(appState);
 }
@@ -56,6 +73,9 @@ export function updateDeviceState(device, updates) {
         return;
     }
     Object.assign(appState[device], updates);
-    log.debug({ device, keys: Object.keys(updates) }, "Aktualizacja stanu urządzenia");
+    log.debug(
+        { device, keys: Object.keys(updates) },
+        "Aktualizacja stanu urządzenia"
+    );
     broadcast(appState);
 }

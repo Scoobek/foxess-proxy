@@ -6,13 +6,14 @@
     "main": "src/app.js",
     "scripts": {
         "start": "node src/app.js",
-        "build": "esbuild src/app.js --bundle --platform=node --format=esm --outfile=dist/app.js --external:express --external:tuyapi --external:winston --external:winston-daily-rotate-file --external:node-cron --external:dotenv",
+        "build": "esbuild src/app.js --bundle --platform=node --format=esm --outfile=dist/app.js --external:express --external:tuyapi --external:winston --external:winston-daily-rotate-file --external:node-cron --external:dotenv --external:gree-hvac-client",
         "start:prod": "node dist/app.js",
         "deploy": "npm run build && sudo systemctl restart SmartHeat.service"
     },
     "dependencies": {
         "dotenv": "^17.3.1",
         "express": "^4.18.2",
+        "gree-hvac-client": "^2.2.0",
         "node-cron": "^4.2.1",
         "tuyapi": "^7.7.1",
         "winston": "^3.19.0",
