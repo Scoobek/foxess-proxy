@@ -33,6 +33,13 @@ export const TUYA_MAX_RETRIES = 3;
 export const TUYA_IDLE_TIMEOUT_MS = 5 * 60 * 1000; // 5 minut bez aktywności = rozłączenie
 export const TUYA_RETRY_DELAY_MS = 1000;
 
+// Gree AC - konfiguracja połączenia
+export const GREE_CONNECT_TIMEOUT_MS = 30000;
+export const GREE_CONNECT_WAIT_MS = 15000; // max czas oczekiwania na connect przed przejściem do kolejnego AC
+export const GREE_POLLING_TIMEOUT_MS = 5000;
+export const GREE_POLLING_INTERVAL_MS = 5000;
+export const GREE_NO_RESPONSE_THRESHOLD = 3; // ile kolejnych no_response zanim uznamy za nieosiągalne
+
 // Zmienne do pobierania z FoxESS API (realtime)
 export const REALTIME_VARIABLES = [
     // Kluczowe metryki
