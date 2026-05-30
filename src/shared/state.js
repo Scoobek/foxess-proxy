@@ -13,27 +13,29 @@ export const appState = {
     sunset: null,
 
     // Urządzenia
-    bojler: {
-        isOn: false,
-        lastChange: null,
-        lastCheck: null,
-        turnedOnBy: null, // 'auto' | 'manual' | null
-        turnedOffBy: null, // 'auto' | 'sunset' | 'manual' | null
-        pvPower: 0,
-        loadsPower: 0,
-        surplus: 0,
-        isPolling: false,
-        pollingStartsAt: null,
-        pollingStopsAt: null,
-        nextPollAt: null,
+    devices: {
+        bojler: {
+            isOn: false,
+            lastChange: null,
+            lastCheck: null,
+            turnedOnBy: null, // 'auto' | 'manual' | null
+            turnedOffBy: null, // 'auto' | 'sunset' | 'manual' | null
+            pvPower: 0,
+            loadsPower: 0,
+            surplus: 0,
+            isPolling: false,
+            pollingStartsAt: null,
+            pollingStopsAt: null,
+            nextPollAt: null,
+        },
+        podswietlenieDomu: {
+            isOn: false,
+            lastChange: null,
+            turnedOnBy: null, // 'auto' | 'manual' | null
+            turnedOffBy: null, // 'auto' | 'sunrise' | 'manual' | null
+        },
+        ac: [],
     },
-    podswietlenieDomu: {
-        isOn: false,
-        lastChange: null,
-        turnedOnBy: null, // 'auto' | 'manual' | null
-        turnedOffBy: null, // 'auto' | 'sunrise' | 'manual' | null
-    },
-    ac: [],
 };
 
 /**
@@ -52,7 +54,7 @@ export function updateAppState(updates) {
  * @param {Object} updates - pola do aktualizacji
  */
 export function updateAcState(id, updates) {
-    const unit = appState.ac.find((u) => u.id === id);
+    const unit = appState.devices.ac.find((u) => u.id === id);
     if (!unit) {
         log.error({ id }, "Nieznane urządzenie AC");
         return;
@@ -68,11 +70,11 @@ export function updateAcState(id, updates) {
  * @param {Object} updates - pola do aktualizacji
  */
 export function updateDeviceState(device, updates) {
-    if (!appState[device]) {
+    if (!appState.devices[device]) {
         log.error({ device }, "Nieznane urządzenie");
         return;
     }
-    Object.assign(appState[device], updates);
+    Object.assign(appState.devices[device], updates);
     log.debug(
         { device, keys: Object.keys(updates) },
         "Aktualizacja stanu urządzenia"
