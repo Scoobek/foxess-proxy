@@ -5,7 +5,7 @@ import { getAcDevice } from "../lib/ac/index.js";
 const router = Router();
 
 router.get("/status", (_req, res) => {
-    res.json(appState.ac);
+    res.json(appState.devices.ac);
 });
 
 router.post("/:id/on", (req, res) => {

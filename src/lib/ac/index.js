@@ -8,7 +8,7 @@ const log = createLogger("ac");
 const _devices = new Map();
 
 function connectDevice({ id, name, ip }) {
-    appState.ac.push({ id, name, reachable: false });
+    appState.devices.ac.push({ id, name, reachable: false });
     const device = new GreeDevice({ id, name, ip });
     _devices.set(id, device);
     return device.connect((state) => updateAcState(id, state));
