@@ -111,9 +111,10 @@ export class GreeDevice {
     }
 
     turnOn() {
-        if (this._state.isOn) {
+        if (this._reachable) {
             this._client.setProperty(PROPERTY.power, VALUE.power.on);
             this.log.info(`Włączanie AC ${this.name}`);
+            this._client.isOn = true;
         }
     }
 
