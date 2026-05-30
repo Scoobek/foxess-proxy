@@ -39,12 +39,15 @@ export class GreeDevice {
         this._client.on("update", (_, allProps) => {
             this._noResponseCount = 0;
             this._reachable = true;
-            this._state = {
+            const newState = {
                 isOn: allProps[PROPERTY.power] === VALUE.power.on,
                 currentTemperature: allProps[PROPERTY.currentTemperature],
                 mode: allProps[PROPERTY.mode],
                 setTemperature: allProps[PROPERTY.temperature],
             };
+            const changed = Object.keys(newState).some((k) => newState[k] !== this._state[k]);
+            if (!changed) return;
+            this._state = newState;
             onStateUpdate(this.getState());
         });
 
@@ -119,7 +122,7 @@ export class GreeDevice {
     }
 
     turnOff() {
-        if (this._state.isOn) {
+        if (this._reachable && this._state?.isOn) {
             this._client.setProperty(PROPERTY.power, VALUE.power.off);
             this.log.info(`Wyłączanie AC ${this.name}`);
         }
