@@ -9,7 +9,7 @@ const clients = [];
 
 export function addClient(res) {
     clients.push(res);
-    log.debug({ total: clients.length }, "Klient SSE połączony");
+    log.info({ total: clients.length }, "Klient SSE połączony");
 }
 
 export function removeClient(res) {
@@ -17,7 +17,7 @@ export function removeClient(res) {
     if (index !== -1) {
         clients.splice(index, 1);
     }
-    log.debug({ total: clients.length }, "Klient SSE rozłączony");
+    log.info({ total: clients.length }, "Klient SSE rozłączony");
 }
 
 export function broadcast(data) {
