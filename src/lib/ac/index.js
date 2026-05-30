@@ -1,6 +1,9 @@
 import { GREE_DEVICES } from "../../config/gree.js";
 import { appState, updateAcState } from "../../shared/state.js";
+import { createLogger } from "../../shared/logger.js";
 import { GreeDevice } from "./device.js";
+
+const log = createLogger("ac");
 
 const _devices = new Map();
 
@@ -12,7 +15,11 @@ function connectDevice({ id, name, ip }) {
 }
 
 export async function initAcDevices() {
-    await Promise.all(GREE_DEVICES.map(connectDevice));
+    const unconfigured = GREE_DEVICES.filter((d) => !d.ip);
+    for (const d of unconfigured) {
+        log.warn({ id: d.id, name: d.name }, "Brak adresu IP - pomijam urządzenie AC");
+    }
+    await Promise.all(GREE_DEVICES.filter((d) => d.ip).map(connectDevice));
 }
 
 export function getAcDevice(id) {
