@@ -10,6 +10,8 @@ import { createServer } from "./api/server.js";
 import { initWorker } from "./worker/orchestration/bootstrap.js";
 import { startScheduler } from "./worker/orchestration/scheduler.js";
 import { createLogger } from "./shared/logger.js";
+import { onStateChange } from "./shared/state.js";
+import { broadcast } from "./shared/sse.js";
 
 const log = createLogger("app");
 
@@ -18,6 +20,8 @@ async function bootstrap() {
         { date: new Date().toLocaleString("pl-PL") },
         "FoxESS Proxy start"
     );
+
+    onStateChange(broadcast);
 
     // Inicjalizacja stanów
     await initWorker();

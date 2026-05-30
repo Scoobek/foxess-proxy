@@ -3,9 +3,18 @@
  */
 
 import { createLogger } from "./logger.js";
-import { broadcast } from "./sse.js";
 
 const log = createLogger("state");
+
+const _listeners = [];
+
+export function onStateChange(fn) {
+    _listeners.push(fn);
+}
+
+function notify() {
+    for (const fn of _listeners) fn(appState);
+}
 
 export const appState = {
     // Współdzielone - dane słoneczne
@@ -45,7 +54,7 @@ export const appState = {
 export function updateAppState(updates) {
     Object.assign(appState, updates);
     log.debug({ keys: Object.keys(updates) }, "Aktualizacja stanu app");
-    broadcast(appState);
+    notify();
 }
 
 /**
@@ -61,7 +70,7 @@ export function updateAcState(id, updates) {
     }
     Object.assign(unit, updates);
     log.debug({ keys: Object.keys(updates) }, "Aktualizacja stanu app");
-    broadcast(appState);
+    notify();
 }
 
 /**
@@ -79,5 +88,5 @@ export function updateDeviceState(device, updates) {
         { device, keys: Object.keys(updates) },
         "Aktualizacja stanu urządzenia"
     );
-    broadcast(appState);
+    notify();
 }
