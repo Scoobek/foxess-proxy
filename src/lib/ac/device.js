@@ -34,19 +34,45 @@ export class GreeDevice {
         this._client.on("connect", () => {
             this._reachable = true;
             this.log.info("Połączono z AC");
+            onStateUpdate(this.getState());
         });
 
+        const parseState = (allProps) => ({
+            isOn: allProps[PROPERTY.power] === VALUE.power.on,
+            currentTemperature: allProps[PROPERTY.currentTemperature],
+            mode: allProps[PROPERTY.mode],
+            setTemperature: allProps[PROPERTY.temperature],
+            fanSpeed: allProps[PROPERTY.fanSpeed],
+        });
+
+        const getDiff = (newState) => {
+            const changedKeys = Object.keys(newState).filter(
+                (k) => newState[k] !== this._state[k]
+            );
+            return changedKeys.length > 0
+                ? Object.fromEntries(changedKeys.map((k) => [k, newState[k]]))
+                : null;
+        };
+
+        // takes any update of ac, room temperature, changes from remote controller
         this._client.on("update", (_, allProps) => {
             this._noResponseCount = 0;
             this._reachable = true;
-            const newState = {
-                isOn: allProps[PROPERTY.power] === VALUE.power.on,
-                currentTemperature: allProps[PROPERTY.currentTemperature],
-                mode: allProps[PROPERTY.mode],
-                setTemperature: allProps[PROPERTY.temperature],
-            };
-            const changed = Object.keys(newState).some((k) => newState[k] !== this._state[k]);
-            if (!changed) return;
+            const newState = parseState(allProps);
+            const diff = getDiff(newState);
+            if (!diff) return;
+            this.log.debug({ diff }, `Zmiana stanu AC ${this.name}`);
+            this._state = newState;
+            onStateUpdate(this.getState());
+        });
+
+        // takes changes via api calls
+        this._client.on("success", (_, allProps) => {
+            const newState = parseState(allProps);
+            const diff = getDiff(newState);
+            if (!diff) return;
+            this.log.info({ diff }, `Zmiana stanu AC ${this.name}`);
+            if ("isOn" in diff) this._client.isOn = diff.isOn;
             this._state = newState;
             onStateUpdate(this.getState());
         });
@@ -113,11 +139,22 @@ export class GreeDevice {
         });
     }
 
+    set({ mode, fanSpeed, temperature }) {
+        if (mode !== undefined) this._client.setProperty(PROPERTY.mode, mode);
+        if (fanSpeed !== undefined)
+            this._client.setProperty(PROPERTY.fanSpeed, fanSpeed);
+        if (temperature !== undefined)
+            this._client.setProperty(PROPERTY.temperature, temperature);
+        this.log.info(
+            { mode, fanSpeed, temperature },
+            `Ustawienie właściwości AC ${this.name}`
+        );
+    }
+
     turnOn() {
         if (this._reachable) {
             this._client.setProperty(PROPERTY.power, VALUE.power.on);
             this.log.info(`Włączanie AC ${this.name}`);
-            this._client.isOn = true;
         }
     }
 
