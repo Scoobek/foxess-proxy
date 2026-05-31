@@ -5,7 +5,7 @@
     "description": "Lokalny proxy serwer dla FoxESS Cloud API",
     "main": "src/app.js",
     "scripts": {
-        "start": "node src/app.js",
+        "start": "LOG_LEVEL=debug node src/app.js",
         "build": "esbuild src/app.js --bundle --platform=node --format=esm --outfile=dist/app.js --external:express --external:tuyapi --external:winston --external:winston-daily-rotate-file --external:node-cron --external:dotenv --external:gree-hvac-client",
         "start:prod": "node dist/app.js",
         "deploy": "npm run build && sudo systemctl restart SmartHeat.service"

@@ -22,7 +22,10 @@ export function removeClient(res) {
 
 export function broadcast(data) {
     if (clients.length === 0) return;
-    const payload = `data: ${JSON.stringify(data)}\n\n`;
+    const payload = `data: ${JSON.stringify({
+        ...data,
+        lastCheck: new Date().toISOString(),
+    })}\n\n`;
     for (const res of clients) {
         res.write(payload);
     }
